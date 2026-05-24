@@ -1174,7 +1174,7 @@ function drawScales(m, W, H) {
       if (delta >  thDivs / 2) delta -= thDivs;
       if (delta < -thDivs / 2) delta += thDivs;
 
-      const ty = datumY + delta * divSpacing;
+      const ty = datumY - delta * divSpacing;
       if (ty < TOP + 3 || ty > BOT - 3) continue;
 
       const isMajor = (d % 5 === 0);
