@@ -1116,9 +1116,11 @@ function drawScales(m, W, H) {
       ctx.lineTo(thimbleEdgeX - 4, vy);
       ctx.stroke();
 
-      // Print Vernier line label on the left (0, 1, 2, ... 9)
-      ctx.fillStyle = showCoin ? '#d81b60' : '#222';
-      ctx.fillText(i === 0 ? '0' : String(i), 32, vy + 4);
+      // Print Vernier line label on the left (0 and 5 only)
+      if (i === 0 || i === 5) {
+        ctx.fillStyle = showCoin ? '#d81b60' : '#222';
+        ctx.fillText(String(i), 32, vy + 4);
+      }
 
       // Draw highlighted horizontal red line glow in zoomed view
       if (showCoin) {
