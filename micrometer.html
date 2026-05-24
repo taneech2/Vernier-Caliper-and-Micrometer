@@ -1010,7 +1010,7 @@ function drawScales(m, W, H) {
   
   if (!isInch) {
     // ── Metric Sleeve Ticks (0.5 mm subdivisions) ──
-    ctx.font = 'bold 11px Inter';
+    ctx.font = 'bold 13px Inter';
     ctx.textAlign = 'center';
     
     // Whole mm ticks (Sleeve Top - every 1.0 mm)
@@ -1049,7 +1049,7 @@ function drawScales(m, W, H) {
     }
   } else {
     // ── Imperial Sleeve Ticks (0.025" subdivisions) ──
-    ctx.font = 'bold 11px Inter';
+    ctx.font = 'bold 13px Inter';
     ctx.textAlign = 'center';
     
     // Major subdivisions (every 0.100" - Tenths of an inch)
@@ -1092,11 +1092,11 @@ function drawScales(m, W, H) {
     // Vernier scale has 10 lines parallel to datum line, situated above it.
     // In metric: represent 0.001 mm. In imperial: represent 0.0001".
     ctx.lineWidth = 0.8;
-    ctx.font = '8px Inter';
+    ctx.font = 'bold 12px Inter';
     ctx.textAlign = 'right';
-    
-    const vLineSpacing = 6;
-    const vStartY = datumY - 10;
+
+    const vLineSpacing = 7;
+    const vStartY = datumY - 12;
     
     // Let's check which vernier line coincides with a thimble line.
     const thVal = (m / cfg.pitch) * (cfg.id.startsWith('in') ? 25 : 50);
@@ -1117,8 +1117,8 @@ function drawScales(m, W, H) {
       ctx.stroke();
 
       // Print Vernier line label on the left (0, 1, 2, ... 9)
-      ctx.fillStyle = showCoin ? '#d81b60' : '#333';
-      ctx.fillText(i === 0 ? '0' : String(i), 30, vy + 3);
+      ctx.fillStyle = showCoin ? '#d81b60' : '#222';
+      ctx.fillText(i === 0 ? '0' : String(i), 32, vy + 4);
 
       // Draw highlighted horizontal red line glow in zoomed view
       if (showCoin) {
@@ -1207,9 +1207,9 @@ function drawScales(m, W, H) {
       // Print division numbers for major ticks (0, 5, 10, 15...)
       if (isMajor) {
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 10px Inter';
+        ctx.font = 'bold 13px Inter';
         ctx.textAlign = 'left';
-        ctx.fillText(String(d), thimbleEdgeX + thBevelW + 20, ty + 3.5);
+        ctx.fillText(String(d), thimbleEdgeX + thBevelW + 20, ty + 4.5);
       }
     }
     
