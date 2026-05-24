@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=920, initial-scale=1.0">
+<title>ไมโครมิเตอร์อัจฉริยะ — สื่อการสอนพรีเมียม</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #00e5ff;
+  --primary-glow: rgba(0, 229, 255, 0.4);
+  --success: #39ff14;
+  --success-glow: rgba(57, 255, 20, 0.4);
+  --danger: #ff007f;
+  --warning: #ffb74d;
+  --bg-slate: #0a1118;
+  --card-bg: rgba(16, 28, 44, 0.55);
+  --card-border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  font-family: 'Sarabun', 'Inter', sans-serif;
+  background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b11 100%);
+  min-height: 100vh; padding: 24px 16px; color: #e0e6ed;
+  overflow-x: hidden;
+}
+
+.container { max-width: 980px; margin: 0 auto; }
+
+/* ── Header ── */
+header {
+  text-align: center; margin-bottom: 24px;
+  position: relative;
+}
+h1 {
+  font-size: 2.2rem; font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 30%, #00e5ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  padding: 8px 0; text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  letter-spacing: -0.5px;
+}
+.subtitle {
+  color: #78909c; font-size: 1rem; margin-top: 4px;
+}
+.author-tag {
+  display: inline-block; background: rgba(0, 229, 255, 0.07);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  padding: 4px 14px; border-radius: 20px; font-size: 0.8rem;
+  color: #80e8ff; margin-top: 8px;
+}
+
+/* ── Mode & Object Selectors ── */
+.control-bar {
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px;
+  margin-bottom: 18px;
+}
+@media(max-width: 768px){ .control-bar { grid-template-columns: 1fr; } }
+
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px; padding: 18px;
+  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.4);
+  transition: border-color 0.3s;
+}
+.glass-panel:hover {
+  border-color: rgba(0, 229, 255, 0.2);
+}
+.panel-title {
+  font-size: 0.85rem; font-weight: 700; color: #90a4ae;
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.mode-btn {
+  padding: 8px 14px; border: 1px solid #37474f;
+  border-radius: 12px; cursor: pointer; font-family: inherit;
+  font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.03); color: #b0bec5;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mode-btn:hover {
+  border-color: var(--primary); color: #fff; background: rgba(0, 229, 255, 0.05);
+}
+.mode-btn.active {
+  border-color: var(--primary); background: var(--primary); color: #060b11;
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+/* ── Dropdown styled ── */
+select {
+  width: 100%; padding: 10px 14px; border-radius: 12px;
+  background: #0d1b2a; border: 1px solid #37474f;
+  color: #fff; font-family: inherit; font-size: 0.9rem;
+  outline: none; cursor: pointer; transition: border-color 0.2s;
+}
+select:focus { border-color: var(--primary); }
+
+.mode-info {
+  text-align: center; font-size: 0.82rem; color: #00e5ff;
+  margin-top: 8px; margin-bottom: 12px; font-style: italic; min-height: 18px;
+}
+
+/* ── Interactive Canvas ── */
+.canvas-container {
+  position: relative; width: 100%; display: flex; justify-content: center;
+  margin-bottom: 16px;
+}
+canvas {
+  display: block; border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.05); cursor: ew-resize;
+  background: radial-gradient(circle at center, #1b263b 0%, #0d1b2a 100%);
+  max-width: 100%;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 12px 36px rgba(0,0,0,0.5);
+}
+
+.slider-row {
+  text-align: center; margin: 16px 0;
+}
+.slider-container {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  max-width: 650px; margin: 8px auto 0;
+}
+.slider-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid #37474f;
+  color: #fff; width: 34px; height: 34px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 1.1rem; transition: all 0.15s;
+}
+.slider-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+
+input[type=range] {
+  flex: 1; height: 6px; -webkit-appearance: none;
+  cursor: pointer; accent-color: var(--primary);
+  background: #1b263b; border-radius: 3px; outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track { height: 6px; }
+
+/* ── Reading panel ── */
+.reading-panel {
+  margin: 18px 0;
+}
+.steps {
+  display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  gap: 8px; align-items: center; text-align: center;
+  margin-top: 14px;
+}
+.step-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px; padding: 14px 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+.step-val { font-size: 1.6rem; font-weight: 700; }
+.step-desc { font-size: 0.78rem; color: #90a4ae; margin-top: 6px; line-height: 1.4; }
+.op { font-size: 1.8rem; color: #546e7a; font-weight: 300; }
+
+/* ── Howto ── */
+.howto {
+  background: rgba(255, 183, 77, 0.04); border: 1px solid rgba(255, 183, 77, 0.2);
+  margin: 18px 0;
+}
+.howto h4 { color: var(--warning); margin-bottom: 8px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
+.howto ol { padding-left: 18px; color: #cfd8dc; font-size: 0.88rem; }
+.howto li { margin-bottom: 6px; line-height: 1.5; }
+.howto li span { color: var(--warning); font-weight: 600; }
+
+/* ── Practice Panel ── */
+.practice-panel {
+  background: rgba(57, 255, 20, 0.02); border: 1px solid rgba(57, 255, 20, 0.12);
+  margin: 18px 0;
+}
+.practice-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+}
+.practice-header h3 { color: var(--success); display: flex; align-items: center; gap: 6px; font-size: 1.1rem; }
+.scoreboard {
+  display: flex; gap: 12px;
+}
+.score-badge {
+  background: rgba(57, 255, 20, 0.07); border: 1px solid rgba(57, 255, 20, 0.2);
+  padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; color: var(--success);
+}
+.streak-badge {
+  background: rgba(255, 0, 127, 0.07); border: 1px solid rgba(255, 0, 127, 0.2);
+  padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; color: #ff3399;
+  display: none; animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(255,0,127,0.2); }
+  100% { transform: scale(1); }
+}
+
+.input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.input-row input {
+  padding: 10px 14px; border-radius: 10px; border: 1px solid #37474f;
+  background: #060b11; color: #fff; font-size: 1rem;
+  font-family: inherit; width: 220px; outline: none; transition: border-color 0.2s;
+}
+.input-row input:focus { border-color: var(--success); }
+
+.btn {
+  padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer;
+  font-family: inherit; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-check { background: var(--success); color: #060b11; box-shadow: 0 4px 12px rgba(57, 255, 20, 0.2); }
+.btn-check:hover { background: #52ff34; box-shadow: 0 6px 16px rgba(57, 255, 20, 0.3); }
+.btn-new { background: rgba(255,255,255,0.06); border: 1px solid #37474f; color: #fff; }
+.btn-new:hover { background: rgba(255,255,255,0.12); }
+
+#feedback { margin-top: 12px; font-size: 0.95rem; min-height: 22px; font-weight: 600; }
+
+@media(max-width:768px){
+  .steps{ grid-template-columns:1fr; }
+  .op{ display:none; }
+  .input-row { flex-direction: column; align-items: stretch; }
+  .input-row input { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<div style="background:rgba(0,0,0,0.55);border-bottom:1px solid rgba(0,229,255,0.15);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-family:'Sarabun',sans-serif;font-size:0.85rem;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);">
+  <span style="color:#90a4ae;">🔧 สื่อการสอนงานช่าง · <strong style="color:#00e5ff;">ไมโครมิเตอร์</strong></span>
+  <div style="display:flex;gap:10px;">
+    <a href="vernier-caliper.html" style="color:#80e8ff;text-decoration:none;border:1px solid rgba(0,229,255,0.25);padding:5px 14px;border-radius:20px;transition:all 0.2s;background:rgba(0,229,255,0.05);" onmouseover="this.style.background='rgba(0,229,255,0.15)'" onmouseout="this.style.background='rgba(0,229,255,0.05)'">📏 เวอร์เนียร์คาลิเปอร์ →</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <header>
+    <h1>🔬 ไมโครมิเตอร์อัจฉริยะเสมือนจริง</h1>
+    <p class="subtitle">สื่อการเรียนรู้ออนไลน์ระบบสัมผัสความละเอียดสูงสำหรับงานช่างวิชาชีพ</p>
+    <div class="author-tag">
+      ผู้จัดทำ: <strong>ครูธานี ชมสุข</strong> · วิทยาลัยการอาชีพบุรีรัมย์
+    </div>
+  </header>
+
+  <!-- Control panel -->
+  <div class="control-bar">
+    <!-- Mode Panel -->
+    <div class="glass-panel">
+      <div class="panel-title">
+        <span>📏 เลือกระดับความละเอียด (มาตราส่วน)</span>
+      </div>
+      <div class="btn-group">
+        <button class="mode-btn active" id="btn-mm01" onclick="setMode('mm01')">0.01 มม.</button>
+        <button class="mode-btn" id="btn-mm001" onclick="setMode('mm001')">0.001 มม. (Vernier)</button>
+        <button class="mode-btn" id="btn-in001" onclick="setMode('in001')">0.001 นิ้ว</button>
+        <button class="mode-btn" id="btn-in0001" onclick="setMode('in0001')">0.0001 นิ้ว (Vernier)</button>
+      </div>
+    </div>
+    <!-- Object selection Panel -->
+    <div class="glass-panel" style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="panel-title" style="margin-bottom: 2px;">
+        <span>📦 เลือกวัตถุที่ต้องการวัด</span>
+      </div>
+      <select id="objectSelect" onchange="selectObject(this.value)">
+        <option value="none">🔍 วัดแบบอิสระ (ไม่มีวัตถุ)</option>
+        <option value="bolt">🔩 สลักเกลียวเหล็ก (Hex Bolt)</option>
+        <option value="bearing">⚽ ลูกปืนเม็ดกลมขัดเงา (Steel Ball)</option>
+        <option value="nut">🍩 น็อตตัวเมียทองเหลือง (Brass Hex Nut)</option>
+        <option value="pipe">🧪 ท่อเหล็กกลวง (Metal Pipe)</option>
+        <option value="plate">📏 แผ่นเหล็กหนา (Metal Plate Thickness)</option>
+      </select>
+    </div>
+  </div>
+  <div class="mode-info" id="modeInfo"></div>
+
+  <!-- Interactive Area -->
+  <div class="canvas-container">
+    <canvas id="cv" width="920" height="350"></canvas>
+  </div>
+
+  <div class="slider-row">
+    <label>แถบปรับละเอียดไมโคร: <strong id="sliderLabel" style="color: var(--primary);"></strong></label><br>
+    <div class="slider-container">
+      <button class="slider-btn" onclick="adjustMeasure(-1)">-</button>
+      <input type="range" id="slider">
+      <button class="slider-btn" onclick="adjustMeasure(1)">+</button>
+    </div>
+  </div>
+
+  <!-- Reading panel -->
+  <div class="glass-panel reading-panel">
+    <div class="panel-title">
+      <span style="color: var(--primary);">📐 การอ่านค่าทีละขั้นตอน (Step-by-Step)</span>
+    </div>
+    <div class="steps">
+      <div class="step-box">
+        <div class="step-val" id="sv1" style="color: var(--warning);">0.00</div>
+        <div class="step-desc" id="sd1">① สเกลบนแกนหลัก<br>ขีดสเกลบน Sleeve ที่พ้นขอบปลอกหมุน</div>
+      </div>
+      <div class="op">+</div>
+      <div class="step-box">
+        <div class="step-val" id="sv2" style="color: var(--success);">0.00</div>
+        <div class="step-desc" id="sd2">② สเกลบนปลอกหมุน<br>ขีดรอบวง Thimble ที่ตรงแนวแกนกลาง × ความละเอียด</div>
+      </div>
+      <div class="op" id="plus_op" style="display: none;">+</div>
+      <div class="step-box" id="vernier_step_box" style="display: none;">
+        <div class="step-val" id="sv_vernier" style="color: #ff00ff;">0.000</div>
+        <div class="step-desc" id="sd_vernier">③ สเกลละเอียดเวอร์เนียร์<br>ขีด Sleeve ที่ตรงแนว Thimble × 0.001</div>
+      </div>
+      <div class="op">=</div>
+      <div class="step-box" style="background: rgba(0, 229, 255, 0.05); border-color: rgba(0, 229, 255, 0.25);">
+        <div class="step-val" id="sv3" style="color: var(--primary);">0.00</div>
+        <div class="step-desc">④ ผลรวมขนาดที่อ่านได้<br>ขนาดความยาวจริงของชิ้นงาน</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide Panel -->
+  <div class="glass-panel howto" id="howto">
+    <h4>💡 คำอธิบายขั้นตอนการวัดงานช่าง</h4>
+    <ol id="howtoList"></ol>
+  </div>
+
+  <!-- Quiz/Practice Panel -->
+  <div class="glass-panel practice-panel">
+    <div class="practice-header">
+      <h3>🎯 ควิซจำลองการทายผลไมโครมิเตอร์</h3>
+      <div class="scoreboard">
+        <div class="score-badge" id="scoreBoard">คะแนนสะสม: 0</div>
+        <div class="score-badge" id="attemptBoard" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#90a4ae;">ทำแล้ว: 0 ข้อ</div>
+        <div class="streak-badge" id="streakBoard">🔥 0 COMBO!</div>
+      </div>
+    </div>
+    <p style="color:#90a4ae; font-size:0.85rem;">สุ่มจำลองความกว้างวัตถุด้วยปุ่ม "🎲 สุ่มโจทย์ใหม่" จากนั้นอ่านตำแหน่งสเกลใหญ่และเกลียวปลอกหมุน แล้วตอบในช่องเพื่อสะสมคะแนน</p>
+    <div class="input-row">
+      <input type="text" id="answer" placeholder="พิมพ์คำตอบของคุณ">
+      <button class="btn btn-check" onclick="checkAns()">✓ ตรวจสอบคำตอบ</button>
+      <button class="btn btn-new" onclick="newQ()">🎲 สุ่มโจทย์ใหม่</button>
+      <button class="btn" onclick="resetScore()" style="background:rgba(255,70,70,0.12);border:1px solid rgba(255,70,70,0.3);color:#ff6b6b;">🔄 รีเซ็ต</button>
+    </div>
+    <div id="feedback"></div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// MODE CONFIGURATIONS
+// ═══════════════════════════════════════════════════════════════════
+const MODES = {
+  mm01: {
+    id:'mm01', label:'0.01 มม.', unitSuffix:' มม.',
+    vernSleeve: false, maxVal: 25.0,
+    LC: 0.01, pxMm: 11.5, pitch: 0.5,
+    info: 'มาตราส่วนเมตริกมาตรฐาน · เกลียวละเอียดพิตช์ 0.5 มม. · ปลอกหมุน 50 ช่อง · ความละเอียด 1/50 = 0.01 มม.',
+    fmtVal(v){ return v.toFixed(2) + ' มม.'; },
+    fmtStep(v){ return v.toFixed(2); },
+    howto(n,lc){ return [
+      `มองที่สเกลบนปลอกแกนหลัก (Sleeve) นำค่าขีดเต็มที่สูงที่สุดซึ่งอยู่เหนือเส้นแนวนอน (ช่องละ 1 มม.)`,
+      `สังเกตขีดแบ่งครึ่งมิลลิเมตรใต้เส้นแนวนอน (Sleeve Bottom) ถ้าเห็นขีดพ้นขอบออกมาบวกเพิ่มอีก <span>0.50 มม.</span>`,
+      `ดูขีดบนสเกลปลอกหมุน (Thimble) ขีดที่ <span>ตรงประกบเป็นแนวราบเดียว</span> กับเส้นหลักกลางเสา → ขีดที่ ${n}`,
+      `นำจำนวนขีดตรง (${n}) × ความละเอียดปลอกสปริง <span>0.01 มม.</span> = ทศนิยมสเกลปลอกหมุน`,
+      `รวมค่าทั้งหมดเข้าด้วยกันเพื่อเป็นคำตอบขนาดจริง มม.`
+    ];}
+  },
+  mm001: {
+    id:'mm001', label:'0.001 มม. (Vernier)', unitSuffix:' มม.',
+    vernSleeve: true, maxVal: 25.0,
+    LC: 0.001, pxMm: 11.5, pitch: 0.5,
+    info: 'ไมโครมิเตอร์ความละเอียดสูง · มีสเกลย่อยเวอร์เนียร์บนเสาหลักแบ่ง 10 ส่วนขนาน · ความละเอียด 0.001 มม.',
+    fmtVal(v){ return v.toFixed(3) + ' มม.'; },
+    fmtStep(v){ return v.toFixed(3); },
+    howto(n,lc){ return [
+      `อ่านค่าสเกลหลักมิลลิเมตรและกึ่งมิลลิเมตร (Sleeve) ที่พ้นขอบปลอกหมุนออกมา (รวมขีด 0.50 มม. ด้านล่างถ้าพบ)`,
+      `อ่านขีดสเกลปลอกหมุน (Thimble) ขีดก่อนหน้าทับเส้นกลางเด่นสุด (เช่น ขีด ${Math.floor(n)}) × 0.01 มม.`,
+      `มองหาสเกลเวอร์เนียร์แนวนอน 10 เส้นด้านบนของปลอกหลัก ขีดที่ <span>ตรงประกบเป็นแนวแนวราบเส้นตรงที่สุด</span> กับขีดของ Thimble พอดี`,
+      `นำจำนวนขีดตรงมาคูณค่าความละเอียดละเอียดสูง <span>0.001 มม.</span> แล้วนำทั้งหมดมารวมกัน`
+    ];}
+  },
+  in001: {
+    id:'in001', label:'0.001 นิ้ว', unitSuffix:'"',
+    vernSleeve: false, maxVal: 1.0,
+    LC: 0.001, pxMm: 290.0, pitch: 0.025,
+    info: 'มาตราส่วนอังกฤษทศนิยม · เสาหลักมีขีดละ 0.025" (40 เกลียวต่อนิ้ว) · ปลอกหมุนแบ่ง 25 ช่อง · ความละเอียด 0.001 นิ้ว',
+    fmtVal(v){ return v.toFixed(3) + '"'; },
+    fmtStep(v){ return v.toFixed(3); },
+    howto(n,lc){ return [
+      `หาขีดสลักนิ้วใหญ่ที่เลยมา (เช่น เลข 1 = 0.100", 2 = 0.200" นิ้ว)`,
+      `ดูขีดช่องย่อยช่องละ <span>0.025"</span> ใกล้ปากที่สุด เช่น ผ่านมาแล้ว 2 ขีด = 2 × 0.025" = 0.050"`,
+      `ค้นหาขีดบนปลอกหมุนเกลียว (Thimble) ขีดที่ตรงตรงแนวเส้นนอนกลางพอดี → ขีดที่ ${n}`,
+      `นำจำนวนขีดตรง (${n}) × ค่าความละเอียดสเกลละเอียด <span>0.001"</span>`,
+      `รวมค่านิ้วทั้งหมดเข้าด้วยกัน = <span>ขนาดนิ้วเศษส่วนแท้</span>`
+    ];}
+  },
+  in0001: {
+    id:'in0001', label:'0.0001 นิ้ว (Vernier)', unitSuffix:'"',
+    vernSleeve: true, maxVal: 1.0,
+    LC: 0.0001, pxMm: 290.0, pitch: 0.025,
+    info: 'ไมโครอังกฤษความละเอียดสูงสุดระดับความละเอียดระดับสูง · สเกลแกนหลักมีแถวเวอร์เนียร์ขนาน 10 ขีด · ความละเอียด 0.0001 นิ้ว',
+    fmtVal(v){ return v.toFixed(4) + '"'; },
+    fmtStep(v){ return v.toFixed(4); },
+    howto(n,lc){ return [
+      `อ่านหน่วยนิ้วย่อยด้านบน (Sleeve) เช่น 0.100" และขวาย่อยช่องละ 0.025" รวมกัน`,
+      `อ่านปลอกเกลียวหมุน (Thimble) ขีดก่อนเข้าใกล้แนวกางคูณ 0.001"`,
+      `สังเกตขีดสเกลย่อยเวอร์เนียร์แถวบนปลอกเสาหลัก 10 เส้นหาขีดที่ทับสบตรงกับขีด Thimble ดีที่สุด`,
+      `คูณเส้นดังกล่าวด้วย <span>0.0001"</span> เพื่อรวมเป็นทศนิยมตำแหน่งที่สี่`
+    ];}
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE & CONFIG
+// ═══════════════════════════════════════════════════════════════════
+let cfg = MODES.mm01;
+let measure = 12.34; // standard initial
+let practiceMode = false;
+let practiceVal  = 0;
+let currentObject = 'none';
+
+// Scoreboard tracking
+let score = 0;
+let streak = 0;
+let totalAttempts = 0;
+
+// Canvas Setup
+const cv     = document.getElementById('cv');
+const ctx    = cv.getContext('2d');
+const slider = document.getElementById('slider');
+
+// Snap & Clamp
+function snapTo(v){ return Math.round(v/cfg.LC)*cfg.LC; }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+// Confetti Particle System
+let confettiParticles = [];
+function spawnConfetti() {
+  confettiParticles = [];
+  const colors = ['#00e5ff', '#39ff14', '#ff007f', '#ffb74d', '#ff00ff', '#ffff00'];
+  for (let i = 0; i < 90; i++) {
+    confettiParticles.push({
+      x: cv.width / 2,
+      y: cv.height + 10,
+      vx: (Math.random() - 0.5) * 16,
+      vy: -12 - Math.random() * 12,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: 4 + Math.random() * 6,
+      gravity: 0.35,
+      alpha: 1.0,
+      life: 80 + Math.random() * 50
+    });
+  }
+}
+
+function updateAndDrawConfetti() {
+  if (confettiParticles.length === 0) return;
+  for (let i = confettiParticles.length - 1; i >= 0; i--) {
+    const p = confettiParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += p.gravity;
+    p.alpha = Math.max(0, p.life / 130);
+    p.life--;
+    
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    
+    if (p.life <= 0 || p.y > cv.height + 20) {
+      confettiParticles.splice(i, 1);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// OBJECT DRAWING FUNCTIONS (Slightly adjusted to fit micrometer gap)
+// ═══════════════════════════════════════════════════════════════════
+function drawObject(m, fixedX, slideX) {
+  if (currentObject === 'none') return;
+  
+  const gW = slideX - fixedX; // Width of gap
+  if (gW <= 2) return;
+  
+  const midX = (fixedX + slideX) / 2;
+  const centerY = 78; // Center Y of spindle
+  
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  
+  if (currentObject === 'bearing') {
+    // ⚽ Steel Ball: glossy metallic ball
+    const rad = gW / 2;
+    const grad = ctx.createRadialGradient(midX - rad*0.25, centerY - rad*0.25, rad*0.1, midX, centerY, rad);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.2, '#cfd8dc');
+    grad.addColorStop(0.5, '#78909c');
+    grad.addColorStop(0.8, '#37474f');
+    grad.addColorStop(1, '#1e272c');
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(midX, centerY, rad, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  } 
+  else if (currentObject === 'bolt') {
+    // 🔩 Hex Bolt
+    const boltH = Math.min(36, Math.max(16, gW * 0.7));
+    const headW = Math.max(12, gW * 0.25);
+    const shaftW = gW - headW;
+    
+    // Draw threaded shaft
+    const shaftGrad = ctx.createLinearGradient(fixedX + headW, centerY - boltH/2, fixedX + headW, centerY + boltH/2);
+    shaftGrad.addColorStop(0, '#90a4ae');
+    shaftGrad.addColorStop(0.3, '#eceff1');
+    shaftGrad.addColorStop(0.7, '#455a64');
+    shaftGrad.addColorStop(1, '#263238');
+    
+    ctx.fillStyle = shaftGrad;
+    ctx.fillRect(fixedX + headW, centerY - boltH/3, shaftW, boltH/1.5);
+    
+    // Thread lines
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 1.5;
+    const threadSpacing = 5;
+    ctx.beginPath();
+    for (let tx = fixedX + headW + 2; tx < slideX - 2; tx += threadSpacing) {
+      ctx.moveTo(tx, centerY - boltH/3);
+      ctx.lineTo(tx, centerY + boltH/3);
+    }
+    ctx.stroke();
+    
+    // Draw hex head
+    const headGrad = ctx.createLinearGradient(fixedX, centerY - boltH/2, fixedX + headW, centerY + boltH/2);
+    headGrad.addColorStop(0, '#cfd8dc');
+    headGrad.addColorStop(0.5, '#78909c');
+    headGrad.addColorStop(1, '#37474f');
+    
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.moveTo(fixedX, centerY - boltH/2);
+    ctx.lineTo(fixedX + headW, centerY - boltH/2.5);
+    ctx.lineTo(fixedX + headW, centerY + boltH/2.5);
+    ctx.lineTo(fixedX, centerY + boltH/2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+  else if (currentObject === 'nut') {
+    // 🍩 Hex Nut: Brass hexagon nut
+    const nutH = Math.min(38, Math.max(18, gW * 0.85));
+    const nutGrad = ctx.createLinearGradient(fixedX, centerY - nutH/2, slideX, centerY + nutH/2);
+    nutGrad.addColorStop(0, '#ffd700'); // gold
+    nutGrad.addColorStop(0.3, '#fff3a0');
+    nutGrad.addColorStop(0.7, '#cc9900');
+    nutGrad.addColorStop(1, '#664c00'); // shadow brass
+    
+    ctx.fillStyle = nutGrad;
+    ctx.beginPath();
+    const radius = gW / 2;
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i;
+      const px = midX + radius * Math.cos(angle);
+      const py = centerY + radius * Math.sin(angle);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+    
+    // Center hole
+    ctx.fillStyle = '#0f1b29';
+    ctx.beginPath();
+    ctx.arc(midX, centerY, radius * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  else if (currentObject === 'pipe') {
+    // 🧪 Steel Pipe
+    const outerRadius = gW / 2;
+    const innerRadius = outerRadius * 0.65;
+    
+    // Outer tube metallic shading
+    const oGrad = ctx.createRadialGradient(midX - outerRadius*0.2, centerY - outerRadius*0.2, outerRadius*0.1, midX, centerY, outerRadius);
+    oGrad.addColorStop(0, '#ffffff');
+    oGrad.addColorStop(0.4, '#b0bec5');
+    oGrad.addColorStop(0.8, '#455a64');
+    oGrad.addColorStop(1, '#263238');
+    
+    ctx.fillStyle = oGrad;
+    ctx.beginPath();
+    ctx.arc(midX, centerY, outerRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Inner hollow space
+    ctx.fillStyle = '#0f1b29';
+    ctx.beginPath();
+    ctx.arc(midX, centerY, innerRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  else if (currentObject === 'plate') {
+    // 📏 Metal Plate Thickness (วัดความหนาแผ่นเหล็ก)
+    const plateH = 46;
+    const pGrad = ctx.createLinearGradient(fixedX, centerY - plateH/2, slideX, centerY + plateH/2);
+    pGrad.addColorStop(0, '#37474f');
+    pGrad.addColorStop(0.4, '#78909c');
+    pGrad.addColorStop(0.8, '#455a64');
+    pGrad.addColorStop(1, '#263238');
+    
+    ctx.fillStyle = pGrad;
+    ctx.fillRect(fixedX, centerY - plateH/2, gW, plateH);
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(fixedX, centerY - plateH/2, gW, plateH);
+    
+    // Plate metal grid/lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let lx = fixedX + 3; lx < slideX; lx += 4) {
+      ctx.moveTo(lx, centerY - plateH/2);
+      ctx.lineTo(lx, centerY + plateH/2);
+    }
+    ctx.stroke();
+  }
+  
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GRAPHICS RENDERING (CANVAS)
+// ═══════════════════════════════════════════════════════════════════
+function draw(m){
+  const W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  
+  // Ambient glow background
+  ctx.fillStyle='#0f1b29'; ctx.fillRect(0,0,W,H);
+  
+  // Grid Lines background
+  ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 30) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 30) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Spindle Sliding Mechanics
+  const anvilW=25;
+  const frameAnvilX = 145; // anvil tip right-face
+  const anvilLeftX = frameAnvilX - anvilW;
+  
+  // Math mapping for spatial graphics
+  const maxMm = cfg.maxVal;
+  const scaleBarMaxPX = 120; // width of standard measurement scale physical gap
+  const pxMm = scaleBarMaxPX / maxMm;
+  
+  const spindleX = frameAnvilX + m * pxMm;
+  
+  // Draw simulation objects in gap
+  drawObject(m, frameAnvilX, spindleX);
+  
+  // Draw C-Frame & Micrometer body shapes
+  drawMicrometerBody(m, W, spindleX, frameAnvilX, anvilLeftX);
+  
+  // Draw Sleeve & Rotating Thimble Scales
+  drawScales(m, W, H);
+  
+  // Update particles
+  updateAndDrawConfetti();
+  
+  // Request next frame if particles are running
+  if (confettiParticles.length > 0) {
+    requestAnimationFrame(() => draw(measure));
+  }
+}
+
+function drawMicrometerBody(m, W, spindleX, frameAnvilX, anvilLeftX) {
+  const scaleBarMaxPX = 120;
+  ctx.save();
+  
+  // ── Steel/Metal Gradients ──────────────────────────────────────────
+  const steelGrad = ctx.createLinearGradient(0, 50, 0, 110);
+  steelGrad.addColorStop(0, '#ffffff');
+  steelGrad.addColorStop(0.3, '#eceff1');
+  steelGrad.addColorStop(0.6, '#b0bec5');
+  steelGrad.addColorStop(0.9, '#78909c');
+  steelGrad.addColorStop(1, '#37474f');
+  
+  const brassGrad = ctx.createLinearGradient(0, 58, 0, 98);
+  brassGrad.addColorStop(0, '#ffd700');
+  brassGrad.addColorStop(0.5, '#cc9900');
+  brassGrad.addColorStop(1, '#664c00');
+  
+  const frameGrad = ctx.createRadialGradient(200, 130, 20, 200, 130, 120);
+  frameGrad.addColorStop(0, '#1a365d'); // deep dark blue textured
+  frameGrad.addColorStop(0.7, '#0f172a'); // space slate
+  frameGrad.addColorStop(1, '#020617');
+  
+  // ── 1. Heavy C-Frame (Body) ─────────────────────────────────────────
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 6;
+  
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#263238';
+  
+  // Deep elegant semi-circle C frame path
+  ctx.fillStyle = frameGrad;
+  ctx.beginPath();
+  // Outer frame outline
+  ctx.arc(200, 105, 95, 0.88 * Math.PI, 0.08 * Math.PI, true);
+  ctx.lineTo(290, 78);
+  ctx.lineTo(290, 96);
+  // Inner frame outline
+  ctx.arc(200, 105, 68, 0.02 * Math.PI, 0.94 * Math.PI);
+  ctx.lineTo(110, 78);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  
+  // Polished chrome margin plates on C-Frame for high aesthetic quality
+  ctx.fillStyle = '#b0bec5';
+  ctx.beginPath();
+  ctx.arc(200, 105, 95, 0.88 * Math.PI, 0.94 * Math.PI, false);
+  ctx.arc(200, 105, 87, 0.94 * Math.PI, 0.88 * Math.PI, true);
+  ctx.closePath(); ctx.fill();
+  
+  ctx.beginPath();
+  ctx.arc(200, 105, 95, 0.02 * Math.PI, 0.08 * Math.PI, false);
+  ctx.arc(200, 105, 87, 0.08 * Math.PI, 0.02 * Math.PI, true);
+  ctx.closePath(); ctx.fill();
+  
+  // Label text on the frame: "ครูธานี ชมสุข"
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = 'bold 9px Sarabun'; ctx.textAlign = 'center';
+  ctx.fillText('วิทยาลัยการอาชีพบุรีรัมย์', 200, 160);
+  let rangeStr = '';
+  if (cfg.id === 'mm01') rangeStr = '0-25mm 0.01mm';
+  else if (cfg.id === 'mm001') rangeStr = '0-25mm 0.001mm';
+  else if (cfg.id === 'in001') rangeStr = '0-1" 0.001"';
+  else if (cfg.id === 'in0001') rangeStr = '0-1" 0.0001"';
+  ctx.fillStyle = '#00e5ff';
+  ctx.fillText('RANGE ' + rangeStr, 200, 175);
+  
+  // ── 2. Fixed Anvil (Left Side) ──────────────────────────────────────
+  ctx.fillStyle = steelGrad;
+  ctx.fillRect(anvilLeftX, 68, 25, 20); // main anvil stem
+  ctx.strokeRect(anvilLeftX, 68, 25, 20);
+  
+  // Dark carbide tip at the measuring face
+  ctx.fillStyle = '#263238';
+  ctx.fillRect(frameAnvilX - 3, 68, 3, 20);
+  
+  // ── 3. Spindle (Sliding Shaft) ─────────────────────────────────────
+  // Spindle rod sticking out of the sleeve
+  const sleeveStartX = 290;
+  ctx.fillStyle = steelGrad;
+  ctx.fillRect(spindleX, 68, sleeveStartX - spindleX, 20);
+  ctx.strokeRect(spindleX, 68, sleeveStartX - spindleX, 20);
+  
+  // Carbide tip of Spindle
+  ctx.fillStyle = '#263238';
+  ctx.fillRect(spindleX, 68, 3, 20);
+  
+  // Lock Lever (Gold Accent)
+  ctx.fillStyle = brassGrad;
+  ctx.beginPath();
+  ctx.arc(274, 98, 6, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  
+  // ── 4. Main Sleeve (Barrel - Fixed) ───────────────────────────────
+  const sleeveW = 120;
+  const sleeveGrad = ctx.createLinearGradient(sleeveStartX, 60, sleeveStartX, 96);
+  sleeveGrad.addColorStop(0, '#ffffff');
+  sleeveGrad.addColorStop(0.4, '#cfd8dc');
+  sleeveGrad.addColorStop(0.8, '#90a4ae');
+  sleeveGrad.addColorStop(1, '#37474f');
+  
+  rr(ctx, sleeveStartX, 60, sleeveW, 36, [0,0,0,0], sleeveGrad, '#263238');
+  
+  // ── 5. Sliding Thimble ────────────────────────────────────────────
+  // Thimble revolves and slides on the sleeve.
+  // Thimble position corresponds to the Spindle location.
+  // Thimble overlaps the sleeve.
+  const thimbleStartX = sleeveStartX + (m * (scaleBarMaxPX / cfg.maxVal)) + 15;
+  const thimbleW = 130;
+  const thimbleH = 46;
+  const thimbleY = 55;
+  
+  const thimbleGrad = ctx.createLinearGradient(thimbleStartX, thimbleY, thimbleStartX, thimbleY + thimbleH);
+  thimbleGrad.addColorStop(0, '#ffffff');
+  thimbleGrad.addColorStop(0.15, '#eceff1');
+  thimbleGrad.addColorStop(0.5, '#b0bec5');
+  thimbleGrad.addColorStop(0.85, '#78909c');
+  thimbleGrad.addColorStop(1, '#37474f');
+  
+  // Draw thimble cylindrical body
+  rr(ctx, thimbleStartX, thimbleY, thimbleW, thimbleH, 6, thimbleGrad, '#263238');
+  
+  // Bevel edge of thimble (slanted reading edge)
+  const bevelGrad = ctx.createLinearGradient(thimbleStartX - 15, thimbleY, thimbleStartX, thimbleY + thimbleH);
+  bevelGrad.addColorStop(0, '#eceff1');
+  bevelGrad.addColorStop(0.5, '#90a4ae');
+  bevelGrad.addColorStop(1, '#263238');
+  
+  ctx.fillStyle = bevelGrad;
+  ctx.beginPath();
+  ctx.moveTo(thimbleStartX, thimbleY);
+  ctx.lineTo(thimbleStartX - 12, thimbleY + 4);
+  ctx.lineTo(thimbleStartX - 12, thimbleY + thimbleH - 4);
+  ctx.lineTo(thimbleStartX, thimbleY + thimbleH);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  
+  // Engraved vertical ridges on the Thimble grip
+  ctx.strokeStyle = '#263238';
+  ctx.lineWidth = 1.2;
+  const gripStart = thimbleStartX + 35;
+  const gripEnd = thimbleStartX + thimbleW - 10;
+  for (let rx = gripStart; rx <= gripEnd; rx += 4.5) {
+    ctx.beginPath();
+    ctx.moveTo(rx, thimbleY + 1.5);
+    ctx.lineTo(rx, thimbleY + thimbleH - 1.5);
+    ctx.stroke();
+  }
+  
+  // ── 6. Ratchet Stop (Right End Knob) ──────────────────────────────
+  const ratchetStartX = thimbleStartX + thimbleW;
+  const ratchetW = 40;
+  const ratchetH = 34;
+  const ratchetY = 61;
+  const ratchetGrad = ctx.createLinearGradient(ratchetStartX, ratchetY, ratchetStartX, ratchetY + ratchetH);
+  ratchetGrad.addColorStop(0, '#b0bec5');
+  ratchetGrad.addColorStop(0.3, '#eceff1');
+  ratchetGrad.addColorStop(0.7, '#455a64');
+  ratchetGrad.addColorStop(1, '#263238');
+  
+  rr(ctx, ratchetStartX, ratchetY, ratchetW, ratchetH, [0,4,4,0], ratchetGrad, '#1c2833');
+  
+  // Ratchet ridges
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 1;
+  for (let rx = ratchetStartX + 4; rx < ratchetStartX + ratchetW - 4; rx += 3.5) {
+    ctx.beginPath(); ctx.moveTo(rx, ratchetY + 1); ctx.lineTo(rx, ratchetY + ratchetH - 1); ctx.stroke();
+  }
+  
+  // ── Dimension Helper Guide Arrow ───────────────────────────────────
+  if(m > 0.1){
+    const lx1 = frameAnvilX, lx2 = spindleX;
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.07)';
+    ctx.fillRect(lx1, 68, lx2 - lx1, 20);
+    
+    // Draw fine neon boundary lines in gap
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.35)'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+    ctx.strokeRect(lx1, 68, lx2 - lx1, 20); ctx.setLineDash([]);
+  }
+  
+  ctx.restore();
+}
+
+function drawScales(m, W, H) {
+  const TOP = 165;
+  const BOT = H - 12;
+  const scaleH = BOT - TOP;
+  const datumY = TOP + scaleH * 0.44; // Central datum line in zoomed view
+  
+  // Scale container styling (High chrome finish)
+  const scGrad = ctx.createLinearGradient(20, TOP, 20, BOT);
+  scGrad.addColorStop(0, '#eceff1');
+  scGrad.addColorStop(0.4, '#b0bec5');
+  scGrad.addColorStop(0.8, '#78909c');
+  scGrad.addColorStop(1, '#37474f');
+  
+  // Draw Sleeve zoomed background block
+  rr(ctx, 20, TOP, W - 40, scaleH, 10, scGrad, '#212f3d');
+  
+  // Draw Central Datum Line (แกนหลักกลาง)
+  ctx.strokeStyle = '#0e1620';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(30, datumY);
+  ctx.lineTo(W - 250, datumY);
+  ctx.stroke();
+
+  // Spindle pitch mechanical conversion
+  // Pitch is 0.5mm (metric) or 0.025" (imperial)
+  const isInch = cfg.id.startsWith('in');
+  const sleeveMaxMm = cfg.maxVal;
+  
+  // Pixels per unit of scale in magnified view
+  const scaleZoomPX = isInch ? 360.0 : 19.5; // pixel width per mm/in
+  const viewBias = 0.4;
+  const viewStart = clamp(m - (W - 240) / scaleZoomPX * viewBias, 0, sleeveMaxMm);
+  
+  const mmToX = val => 35 + (val - viewStart) * scaleZoomPX;
+  
+  // Thimble sliding edge x in zoomed view
+  const thimbleEdgeX = mmToX(m);
+  
+  // ── A. SLEEVE ENGRAVING TICKS ──────────────────────────────────────
+  // Ticks are covered/masked by the thimble cylinder on the right (x > thimbleEdgeX)
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(20, TOP + 1, thimbleEdgeX - 20, scaleH - 2);
+  ctx.clip(); // Masking clip: only draw ticks exposed to the left of the thimble edge!
+  
+  ctx.fillStyle = '#000';
+  ctx.strokeStyle = '#1c2833';
+  
+  if (!isInch) {
+    // ── Metric Sleeve Ticks (0.5 mm subdivisions) ──
+    ctx.font = 'bold 11px Inter';
+    ctx.textAlign = 'center';
+    
+    // Whole mm ticks (Sleeve Top - every 1.0 mm)
+    for (let mm = 0; mm <= sleeveMaxMm; mm += 1.0) {
+      const x = mmToX(mm);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, datumY);
+      if (cfg.vernSleeve) {
+        ctx.lineTo(x, datumY + 22);
+        ctx.stroke();
+        if (mm % 5 === 0) {
+          ctx.fillText(mm, x, datumY + 32);
+        }
+      } else {
+        ctx.lineTo(x, datumY - 26);
+        ctx.stroke();
+        if (mm % 5 === 0) {
+          ctx.fillText(mm, x, datumY - 33);
+        }
+      }
+    }
+    
+    // Half mm ticks (Sleeve Bottom - every 0.5 mm)
+    for (let mm = 0.5; mm <= sleeveMaxMm; mm += 1.0) {
+      const x = mmToX(mm);
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x, datumY);
+      if (cfg.vernSleeve) {
+        ctx.lineTo(x, datumY + 12);
+      } else {
+        ctx.lineTo(x, datumY + 18);
+      }
+      ctx.stroke();
+    }
+  } else {
+    // ── Imperial Sleeve Ticks (0.025" subdivisions) ──
+    ctx.font = 'bold 11px Inter';
+    ctx.textAlign = 'center';
+    
+    // Major subdivisions (every 0.100" - Tenths of an inch)
+    for (let inc = 0; inc <= sleeveMaxMm; inc += 0.100) {
+      const x = mmToX(inc);
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(x, datumY);
+      if (cfg.vernSleeve) {
+        ctx.lineTo(x, datumY + 22);
+        ctx.stroke();
+        const numLabel = Math.round(inc * 10);
+        ctx.fillText(numLabel, x, datumY + 32);
+      } else {
+        ctx.lineTo(x, datumY - 28);
+        ctx.stroke();
+        const numLabel = Math.round(inc * 10);
+        ctx.fillText(numLabel, x, datumY - 35);
+      }
+    }
+    
+    // Minor subdivisions (every 0.025" - Thousandths)
+    for (let inc = 0.025; inc <= sleeveMaxMm; inc += 0.025) {
+      if (Math.abs((inc * 10) % 1) < 0.001) continue; // skip major
+      const x = mmToX(inc);
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(x, datumY);
+      if (cfg.vernSleeve) {
+        ctx.lineTo(x, datumY + 12);
+      } else {
+        ctx.lineTo(x, datumY + 16);
+      }
+      ctx.stroke();
+    }
+  }
+  
+  // ── B. VERNIER SLEEVE LINES (Parallel Horizontal lines - if active) ──
+  if (cfg.vernSleeve) {
+    // Vernier scale has 10 lines parallel to datum line, situated above it.
+    // In metric: represent 0.001 mm. In imperial: represent 0.0001".
+    ctx.lineWidth = 0.8;
+    ctx.font = '8px Inter';
+    ctx.textAlign = 'right';
+    
+    const vLineSpacing = 6;
+    const vStartY = datumY - 10;
+    
+    // Let's check which vernier line coincides with a thimble line.
+    const thVal = (m / cfg.pitch) * (cfg.id.startsWith('in') ? 25 : 50);
+    const fracPart = thVal - Math.floor(thVal);
+    const coinIdx = Math.round(fracPart * 10) % 10;
+    
+    for (let i = 0; i <= 9; i++) {
+      const vy = vStartY - i * vLineSpacing;
+      const isCoinciding = (i === coinIdx && m > 0.0005);
+      
+      ctx.strokeStyle = isCoinciding ? 'rgba(255, 0, 127, 0.7)' : 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = isCoinciding ? 1.8 : 0.8;
+      
+      ctx.beginPath();
+      ctx.moveTo(35, vy);
+      ctx.lineTo(thimbleEdgeX - 4, vy);
+      ctx.stroke();
+      
+      // Print Vernier line label on the left (0, 1, 2, ... 9)
+      ctx.fillStyle = isCoinciding ? '#d81b60' : '#333';
+      ctx.fillText(i === 0 ? '0' : String(i), 30, vy + 3);
+      
+      // Draw highlighted horizontal red line glow in zoomed view
+      if (isCoinciding) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 0, 127, 0.25)';
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(35, vy); ctx.lineTo(thimbleEdgeX - 4, vy); ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+  
+  ctx.restore(); // Restore clip masking
+  
+  // ── C. ROTATING THIMBLE CYLINDER (ปลอกหมุนแบบเกลียว 3D) ─────────────
+  // Drawn on the right starting at thimbleEdgeX
+  const thZoomW = W - 20 - thimbleEdgeX;
+  if (thZoomW > 10) {
+    ctx.save();
+    
+    // Metallic gradient shading on rotating cylinder
+    const cylGrad = ctx.createLinearGradient(thimbleEdgeX, TOP, thimbleEdgeX, BOT);
+    cylGrad.addColorStop(0, '#ffffff');
+    cylGrad.addColorStop(0.1, '#e3f2fd');
+    cylGrad.addColorStop(0.3, '#bbdefb');
+    cylGrad.addColorStop(0.5, '#90caf9'); // shiny center datum alignment
+    cylGrad.addColorStop(0.7, '#64b5f6');
+    cylGrad.addColorStop(1, '#1e88e5');
+    
+    // Draw thimble body background
+    rr(ctx, thimbleEdgeX, TOP + 1, thZoomW, scaleH - 2, [0, 8, 8, 0], cylGrad, '#1a5276');
+    
+    // Slanted/beveled front edge border
+    const thBevelW = 16;
+    const bevGrad = ctx.createLinearGradient(thimbleEdgeX, TOP, thimbleEdgeX + thBevelW, BOT);
+    bevGrad.addColorStop(0, '#ffffff');
+    bevGrad.addColorStop(0.5, '#90caf9');
+    bevGrad.addColorStop(1, '#1565c0');
+    
+    ctx.fillStyle = bevGrad;
+    ctx.fillRect(thimbleEdgeX, TOP + 1, thBevelW, scaleH - 2);
+    ctx.strokeStyle = '#1a5276'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(thimbleEdgeX + thBevelW, TOP + 1); ctx.lineTo(thimbleEdgeX + thBevelW, BOT - 1); ctx.stroke();
+    
+    // ── D. 3D CYLINDRICAL PROJECTION FOR ROTATING TICKS ────────────────
+    // We map thimble divisions (50 divisions for metric, 25 divisions for imperial)
+    // to a 3D cylindrical vertical coordinate using sin/cos trigonometry.
+    const thDivs = isInch ? 25 : 50;
+    const thValue = (m / cfg.pitch) * thDivs; // current float thimble divisions
+    
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(thimbleEdgeX, TOP + 2, thZoomW - 2, scaleH - 4);
+    ctx.clip(); // clip within cylinder boundaries
+    
+    const cylRadiusY = scaleH * 0.49; // 3D cylinder projection radius
+    
+    for (let d = 0; d < thDivs; d++) {
+      // Calculate angle of this tick on the cylinder circumference.
+      // datumLine (y = datumY) represents angle theta = 0.
+      // Standard rotation direction: numbers increase downwards
+      const theta = (d - thValue) * (2 * Math.PI / thDivs);
+      
+      // Project 3D coordinate onto 2D vertical axis
+      const cosT = Math.cos(theta);
+      if (cosT <= 0) continue; // Tick is on the back side of the cylinder (invisible)
+      
+      const ty = datumY + cylRadiusY * Math.sin(theta);
+      
+      const isMajor = (d % 5 === 0);
+      ctx.strokeStyle = isMajor ? '#000' : '#222';
+      ctx.lineWidth = isMajor ? 1.8 : 0.9;
+      
+      // Bevel ticks: follow angled surface on bevel
+      ctx.beginPath();
+      ctx.moveTo(thimbleEdgeX, ty);
+      ctx.lineTo(thimbleEdgeX + thBevelW, ty);
+      ctx.stroke();
+      
+      // Horizontal straight ticks on main thimble body
+      ctx.beginPath();
+      ctx.moveTo(thimbleEdgeX + thBevelW, ty);
+      ctx.lineTo(thimbleEdgeX + thBevelW + 16, ty);
+      ctx.stroke();
+      
+      // Print division numbers for major ticks (0, 5, 10, 15...)
+      if (isMajor) {
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 10px Inter';
+        ctx.textAlign = 'left';
+        ctx.fillText(String(d), thimbleEdgeX + thBevelW + 20, ty + 3.5);
+      }
+    }
+    
+    ctx.restore(); // end thimble cylinder clip
+    
+    // Central Pointer alignment marker (Neon Magenta horizontal guide line)
+    ctx.strokeStyle = 'rgba(255, 0, 127, 0.75)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(thimbleEdgeX - 12, datumY);
+    ctx.lineTo(thimbleEdgeX + 4, datumY);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#ff007f';
+    ctx.beginPath();
+    ctx.moveTo(thimbleEdgeX + 4, datumY);
+    ctx.lineTo(thimbleEdgeX - 4, datumY - 5);
+    ctx.lineTo(thimbleEdgeX - 4, datumY + 5);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.restore();
+  }
+  
+  // Final outer border box
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 2;
+  rr(ctx, 20, TOP, W - 40, scaleH, 10, null, '#1565c0');
+}
+
+// rounded rect helper
+function rr(ctx,x,y,w,h,r,fill,stroke){
+  const rv=typeof r==='number'?[r,r,r,r]:r.map(v => v === 0 ? 0.1 : v);
+  ctx.beginPath();
+  ctx.moveTo(x+rv[0],y);
+  ctx.lineTo(x+w-rv[1],y);   ctx.arcTo(x+w,y,   x+w,y+h,rv[1]);
+  ctx.lineTo(x+w,y+h-rv[2]); ctx.arcTo(x+w,y+h, x,  y+h,rv[2]);
+  ctx.lineTo(x+rv[3],y+h);   ctx.arcTo(x,  y+h, x,  y,  rv[3]);
+  ctx.lineTo(x,y+rv[0]);     ctx.arcTo(x,  y,   x+w,y,  rv[0]);
+  ctx.closePath();
+  if(fill)  {
+    ctx.fillStyle=fill;
+    ctx.fill();
+  }
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════════════════════════════════════════
+function updateUI(m){
+  const isInch = cfg.id.startsWith('in');
+  
+  // Calculate sleeve and thimble component breakdown for Step-by-Step panel
+  const thDivs = isInch ? 25 : 50;
+  
+  // 1. Sleeve Reading (หลัก + ครึ่งมิลลิเมตร)
+  // Metric: Sleeve ticks are spaced 0.5 mm apart.
+  // Imperial: Sleeve ticks are spaced 0.025" apart.
+  const sleeveUnit = cfg.pitch; 
+  const sleeveReading = Math.floor(m / sleeveUnit) * sleeveUnit;
+  
+  // 2. Thimble Reading (ปลอกหมุน)
+  const remaining = m - sleeveReading;
+  const thFloat = (remaining / cfg.pitch) * thDivs;
+  
+  // In Vernier mode: Thimble reading is rounded down to nearest integer,
+  // and the fractional remainder is matched on the Sleeve Vernier scale.
+  const thReadIdx = cfg.vernSleeve ? Math.floor(thFloat) : Math.round(thFloat);
+  const thValue = thReadIdx * (cfg.pitch / thDivs);
+  
+  // 3. Vernier Reading (สเกลย่อยละเอียดสูง)
+  let vernValue = 0;
+  let vernIdx = 0;
+  if (cfg.vernSleeve) {
+    const fracRemainder = thFloat - Math.floor(thFloat);
+    vernIdx = Math.round(fracRemainder * 10) % 10;
+    vernValue = vernIdx * (isInch ? 0.0001 : 0.001);
+  }
+  
+  document.getElementById('sliderLabel').textContent = cfg.fmtVal(m);
+  
+  if(!practiceMode){
+    document.getElementById('sv1').textContent = cfg.fmtStep(sleeveReading);
+    
+    const thScaleLC = cfg.pitch / thDivs;
+    document.getElementById('sv2').innerHTML = thReadIdx + ' × ' + (isInch ? thScaleLC.toFixed(3) : thScaleLC.toFixed(2)) + '<br>= ' + cfg.fmtStep(thValue);
+    
+    // Toggle Vernier Step display based on active mode configuration
+    const vBox = document.getElementById('vernier_step_box');
+    const plusOp = document.getElementById('plus_op');
+    
+    if (cfg.vernSleeve) {
+      vBox.style.display = 'block';
+      plusOp.style.display = 'block';
+      
+      const vLC = isInch ? 0.0001 : 0.001;
+      document.getElementById('sv_vernier').innerHTML = vernIdx + ' × ' + vLC.toFixed(isInch?4:3) + '<br>= ' + cfg.fmtStep(vernValue);
+    } else {
+      vBox.style.display = 'none';
+      plusOp.style.display = 'none';
+    }
+    
+    document.getElementById('sv3').textContent = cfg.fmtVal(m);
+  }
+  
+  // Update howto instructions text list
+  const steps = cfg.howto(thReadIdx, cfg.LC);
+  document.getElementById('howtoList').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
+}
+
+function setMeasure(v){
+  measure = snapTo(clamp(v, 0, cfg.maxVal));
+  slider.value = measure;
+  draw(measure);
+  updateUI(measure);
+}
+
+function adjustMeasure(direction) {
+  if (practiceMode) return;
+  setMeasure(measure + direction * cfg.LC);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// OBJECT SELECTION
+// ═══════════════════════════════════════════════════════════════════
+function selectObject(val) {
+  currentObject = val;
+  // Automatically size caliper to match object default dimensions when selected
+  if (val !== 'none' && !practiceMode) {
+    let size = 12.34;
+    const isInch = cfg.id.startsWith('in');
+    
+    if (val === 'bolt') size = isInch ? 0.542 : 14.28;
+    else if (val === 'bearing') size = isInch ? 0.635 : 16.12;
+    else if (val === 'nut') size = isInch ? 0.748 : 19.05;
+    else if (val === 'pipe') size = isInch ? 0.866 : 22.18;
+    else if (val === 'plate') size = isInch ? 0.165 : 4.22;
+    
+    setMeasure(size);
+  } else {
+    draw(measure);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MODE SWITCHING
+// ═══════════════════════════════════════════════════════════════════
+function setMode(id){
+  cfg = MODES[id];
+  // update buttons state
+  Object.keys(MODES).forEach(k => {
+    const b = document.getElementById('btn-' + k);
+    if(b) b.classList.toggle('active', k === id);
+  });
+  document.getElementById('modeInfo').textContent = cfg.info;
+  
+  // configure slider limits
+  slider.min = 0; slider.max = cfg.maxVal; slider.step = cfg.LC;
+  
+  // Configure input placeholder
+  document.getElementById('answer').placeholder = cfg.id.startsWith('in') ? 'กรอกค่านิ้ว เช่น 0.542' : 'กรอกค่ามิลลิเมตร เช่น 12.34';
+  
+  // Reset quiz/practice panels
+  practiceMode = false;
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('answer').value = '';
+  
+  // Snap measurements to scale limits
+  measure = snapTo(clamp(measure, 0, cfg.maxVal));
+  slider.value = measure;
+  draw(measure);
+  updateUI(measure);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONTROLS AND INTERACTIVITY
+// ═══════════════════════════════════════════════════════════════════
+slider.addEventListener('input', function(){
+  if(practiceMode) return;
+  setMeasure(parseFloat(this.value));
+});
+
+let dragging=false, lastPX=0;
+cv.addEventListener('mousedown', e => { dragging = true; lastPX = e.clientX; });
+cv.addEventListener('mousemove', e => {
+  if(!dragging || practiceMode) return;
+  const dx = e.clientX - lastPX; lastPX = e.clientX;
+  
+  // Spindle mechanical drag mapping ratio
+  const dragRatio = cfg.id.startsWith('in') ? 1000 : 40;
+  setMeasure(measure + dx / dragRatio);
+});
+window.addEventListener('mouseup',   () => { dragging = false; });
+cv.addEventListener('mouseleave', () => { dragging = false; });
+
+// Mobile Touch Interactivity support
+cv.addEventListener('touchstart', e => {
+  dragging = true;
+  lastPX = e.touches[0].clientX;
+  e.preventDefault();
+}, {passive:false});
+cv.addEventListener('touchmove', e => {
+  if(!dragging || practiceMode) return;
+  const dx = e.touches[0].clientX - lastPX; lastPX = e.touches[0].clientX;
+  const dragRatio = cfg.id.startsWith('in') ? 1000 : 40;
+  setMeasure(measure + dx / dragRatio);
+  e.preventDefault();
+}, {passive:false});
+cv.addEventListener('touchend', () => { dragging = false; });
+
+// Keyboard Nudging Controls (ArrowRight/ArrowUp to increase, ArrowLeft/ArrowDown to decrease by 1 Least Count)
+window.addEventListener('keydown', function(e) {
+  // If the user is currently typing inside the answer input box, bypass nudge hotkeys
+  if (document.activeElement === document.getElementById('answer')) {
+    return;
+  }
+  
+  if (practiceMode) return;
+  
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+    setMeasure(measure + cfg.LC);
+    e.preventDefault();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+    setMeasure(measure - cfg.LC);
+    e.preventDefault();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// PRACTICE / TEST QUIZ MODE
+// ═══════════════════════════════════════════════════════════════════
+function newQ(){
+  // Random dimensions within tool range
+  const rangeMax = cfg.maxVal * 0.8;
+  const rangeMin = cfg.maxVal * 0.15;
+  const steps = Math.floor(Math.random() * ((rangeMax - rangeMin) / cfg.LC)) + Math.ceil(rangeMin / cfg.LC);
+  practiceVal = snapTo(steps * cfg.LC);
+  practiceMode = true;
+  measure = practiceVal;
+  slider.value = practiceVal;
+  
+  // Redraw canvas with hidden answers
+  draw(measure);
+  
+  document.getElementById('sv1').textContent = '??';
+  document.getElementById('sv2').innerHTML = '?? × ??<br>= ??';
+  const vBox = document.getElementById('vernier_step_box');
+  const plusOp = document.getElementById('plus_op');
+  if (cfg.vernSleeve) {
+    vBox.style.display = 'block';
+    plusOp.style.display = 'block';
+    document.getElementById('sv_vernier').innerHTML = '?? × ??<br>= ??';
+  } else {
+    vBox.style.display = 'none';
+    plusOp.style.display = 'none';
+  }
+  document.getElementById('sv3').textContent = '??';
+  document.getElementById('sliderLabel').textContent = '??';
+  document.getElementById('answer').value = '';
+  document.getElementById('feedback').innerHTML = '';
+  
+  // Randomly assign a simulated object backdrop for the quiz
+  const objects = ['bolt', 'bearing', 'nut', 'pipe', 'plate'];
+  const randObj = objects[Math.floor(Math.random() * objects.length)];
+  document.getElementById('objectSelect').value = randObj;
+  currentObject = randObj;
+  draw(measure);
+}
+
+function checkAns(){
+  if(!practiceMode){
+    document.getElementById('feedback').innerHTML='<span style="color:var(--warning)">คลิกปุ่ม "🎲 สุ่มโจทย์ใหม่" ก่อนเริ่มทำการทดสอบนะครับ 🙂</span>';
+    return;
+  }
+  
+  const answerInput = document.getElementById('answer').value.trim();
+  const raw = parseFloat(answerInput);
+  if(isNaN(raw)){
+    document.getElementById('feedback').innerHTML='<span style="color:var(--warning)">กรุณากรอกตัวเลขคำตอบทศนิยมให้ถูกต้อง</span>';
+    return;
+  }
+  
+  const margin = cfg.LC * 0.49; // allow exact match with tolerance
+  totalAttempts += 1;
+  document.getElementById('attemptBoard').textContent = `ทำแล้ว: ${totalAttempts} ข้อ`;
+  if(Math.abs(raw - practiceVal) < margin){
+    score += 10;
+    streak += 1;
+
+    // Play celebratory victory confetti and feedback
+    spawnConfetti();
+    draw(measure);
+
+    document.getElementById('feedback').innerHTML =
+      `<span style="color:var(--success)">✅ ยอดเยี่ยม! คำตอบของคุณถูกต้อง (${cfg.fmtVal(practiceVal)}) รับ +10 คะแนน!</span>`;
+
+    document.getElementById('scoreBoard').textContent = `คะแนนสะสม: ${score}`;
+
+    const streakEl = document.getElementById('streakBoard');
+    streakEl.textContent = `🔥 ${streak} COMBO!`;
+    streakEl.style.display = streak > 1 ? 'block' : 'none';
+
+    practiceMode = false;
+    updateUI(practiceVal);
+    document.getElementById('sliderLabel').textContent = cfg.fmtVal(practiceVal);
+  } else {
+    streak = 0;
+    document.getElementById('streakBoard').style.display = 'none';
+    document.getElementById('feedback').innerHTML =
+      `<span style="color:var(--danger)">❌ คำตอบยังไม่ถูกต้องครับ — ลองสังเกตขีดแบ่งของแกน Sleeve และเกลียวบน Thimble ที่ทับ Datum Line อีกรอบนะครับ</span>`;
+  }
+}
+
+function resetScore() {
+  score = 0; streak = 0; totalAttempts = 0;
+  practiceMode = false;
+  document.getElementById('scoreBoard').textContent = 'คะแนนสะสม: 0';
+  document.getElementById('attemptBoard').textContent = 'ทำแล้ว: 0 ข้อ';
+  document.getElementById('streakBoard').style.display = 'none';
+  document.getElementById('feedback').innerHTML = '<span style="color:var(--warning)">🔄 รีเซ็ตคะแนนแล้ว — พร้อมเริ่มใหม่!</span>';
+  document.getElementById('answer').value = '';
+}
+
+document.getElementById('answer').addEventListener('keydown', e => { if(e.key === 'Enter') checkAns(); });
+
+// ═══════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════
+setMode('mm01');
+setMeasure(12.34);
+</script>
+</body>
+</html>

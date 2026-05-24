@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=920, initial-scale=1.0">
+<title>เวอร์เนียร์คาลิเปอร์ — สื่อการสอนพรีเมียม</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #00e5ff;
+  --primary-glow: rgba(0, 229, 255, 0.4);
+  --success: #39ff14;
+  --success-glow: rgba(57, 255, 20, 0.4);
+  --danger: #ff007f;
+  --warning: #ffb74d;
+  --bg-slate: #0a1118;
+  --card-bg: rgba(16, 28, 44, 0.55);
+  --card-border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  font-family: 'Sarabun', 'Inter', sans-serif;
+  background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b11 100%);
+  min-height: 100vh; padding: 24px 16px; color: #e0e6ed;
+  overflow-x: hidden;
+}
+
+.container { max-width: 980px; margin: 0 auto; }
+
+/* ── Header ── */
+header {
+  text-align: center; margin-bottom: 24px;
+  position: relative;
+}
+h1 {
+  font-size: 2.2rem; font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 30%, #00e5ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  padding: 8px 0; text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  letter-spacing: -0.5px;
+}
+.subtitle {
+  color: #78909c; font-size: 1rem; margin-top: 4px;
+}
+.author-tag {
+  display: inline-block; background: rgba(0, 229, 255, 0.07);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  padding: 4px 14px; border-radius: 20px; font-size: 0.8rem;
+  color: #80e8ff; margin-top: 8px;
+}
+
+/* ── Mode & Object Selectors ── */
+.control-bar {
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px;
+  margin-bottom: 18px;
+}
+@media(max-width: 768px){ .control-bar { grid-template-columns: 1fr; } }
+
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px; padding: 18px;
+  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.4);
+  transition: border-color 0.3s;
+}
+.glass-panel:hover {
+  border-color: rgba(0, 229, 255, 0.2);
+}
+.panel-title {
+  font-size: 0.85rem; font-weight: 700; color: #90a4ae;
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.mode-btn {
+  padding: 8px 14px; border: 1px solid #37474f;
+  border-radius: 12px; cursor: pointer; font-family: inherit;
+  font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.03); color: #b0bec5;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mode-btn:hover {
+  border-color: var(--primary); color: #fff; background: rgba(0, 229, 255, 0.05);
+}
+.mode-btn.active {
+  border-color: var(--primary); background: var(--primary); color: #060b11;
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+/* ── Dropdown styled ── */
+select {
+  width: 100%; padding: 10px 14px; border-radius: 12px;
+  background: #0d1b2a; border: 1px solid #37474f;
+  color: #fff; font-family: inherit; font-size: 0.9rem;
+  outline: none; cursor: pointer; transition: border-color 0.2s;
+}
+select:focus { border-color: var(--primary); }
+
+.mode-info {
+  text-align: center; font-size: 0.82rem; color: #00e5ff;
+  margin-top: 8px; margin-bottom: 12px; font-style: italic; min-height: 18px;
+}
+
+/* ── Interactive Canvas ── */
+.canvas-container {
+  position: relative; width: 100%; display: flex; justify-content: center;
+  margin-bottom: 16px;
+}
+canvas {
+  display: block; border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.05); cursor: ew-resize;
+  background: radial-gradient(circle at center, #1b263b 0%, #0d1b2a 100%);
+  max-width: 100%;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 12px 36px rgba(0,0,0,0.5);
+}
+
+.slider-row {
+  text-align: center; margin: 16px 0;
+}
+.slider-container {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  max-width: 650px; margin: 8px auto 0;
+}
+.slider-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid #37474f;
+  color: #fff; width: 34px; height: 34px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 1.1rem; transition: all 0.15s;
+}
+.slider-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+
+input[type=range] {
+  flex: 1; height: 6px; -webkit-appearance: none;
+  cursor: pointer; accent-color: var(--primary);
+  background: #1b263b; border-radius: 3px; outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track { height: 6px; }
+
+/* ── Reading panel ── */
+.reading-panel {
+  margin: 18px 0;
+}
+.steps {
+  display: grid; grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 12px; align-items: center; text-align: center;
+  margin-top: 14px;
+}
+.step-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px; padding: 14px 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+.step-val { font-size: 1.8rem; font-weight: 700; }
+.step-desc { font-size: 0.78rem; color: #90a4ae; margin-top: 6px; line-height: 1.4; }
+.op { font-size: 1.8rem; color: #546e7a; font-weight: 300; }
+
+/* ── Howto ── */
+.howto {
+  background: rgba(255, 183, 77, 0.04); border: 1px solid rgba(255, 183, 77, 0.2);
+  margin: 18px 0;
+}
+.howto h4 { color: var(--warning); margin-bottom: 8px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
+.howto ol { padding-left: 18px; color: #cfd8dc; font-size: 0.88rem; }
+.howto li { margin-bottom: 6px; line-height: 1.5; }
+.howto li span { color: var(--warning); font-weight: 600; }
+
+/* ── Practice Panel ── */
+.practice-panel {
+  background: rgba(57, 255, 20, 0.02); border: 1px solid rgba(57, 255, 20, 0.12);
+  margin: 18px 0;
+}
+.practice-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+}
+.practice-header h3 { color: var(--success); display: flex; align-items: center; gap: 6px; font-size: 1.1rem; }
+.scoreboard {
+  display: flex; gap: 12px;
+}
+.score-badge {
+  background: rgba(57, 255, 20, 0.07); border: 1px solid rgba(57, 255, 20, 0.2);
+  padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; color: var(--success);
+}
+.streak-badge {
+  background: rgba(255, 0, 127, 0.07); border: 1px solid rgba(255, 0, 127, 0.2);
+  padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; color: #ff3399;
+  display: none; animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(255,0,127,0.2); }
+  100% { transform: scale(1); }
+}
+
+.input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.input-row input {
+  padding: 10px 14px; border-radius: 10px; border: 1px solid #37474f;
+  background: #060b11; color: #fff; font-size: 1rem;
+  font-family: inherit; width: 180px; outline: none; transition: border-color 0.2s;
+}
+.input-row input:focus { border-color: var(--success); }
+
+.btn {
+  padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer;
+  font-family: inherit; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-check { background: var(--success); color: #060b11; box-shadow: 0 4px 12px rgba(57, 255, 20, 0.2); }
+.btn-check:hover { background: #52ff34; box-shadow: 0 6px 16px rgba(57, 255, 20, 0.3); }
+.btn-new { background: rgba(255,255,255,0.06); border: 1px solid #37474f; color: #fff; }
+.btn-new:hover { background: rgba(255,255,255,0.12); }
+
+#feedback { margin-top: 12px; font-size: 0.95rem; min-height: 22px; font-weight: 600; }
+
+@media(max-width:600px){
+  .steps{ grid-template-columns:1fr; }
+  .op{ display:none; }
+  .input-row { flex-direction: column; align-items: stretch; }
+  .input-row input { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<div style="background:rgba(0,0,0,0.55);border-bottom:1px solid rgba(0,229,255,0.15);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-family:'Sarabun',sans-serif;font-size:0.85rem;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);">
+  <span style="color:#90a4ae;">🔧 สื่อการสอนงานช่าง · <strong style="color:#00e5ff;">เวอร์เนียร์คาลิเปอร์</strong></span>
+  <div style="display:flex;gap:10px;">
+    <a href="micrometer.html" style="color:#80e8ff;text-decoration:none;border:1px solid rgba(0,229,255,0.25);padding:5px 14px;border-radius:20px;transition:all 0.2s;background:rgba(0,229,255,0.05);" onmouseover="this.style.background='rgba(0,229,255,0.15)'" onmouseout="this.style.background='rgba(0,229,255,0.05)'">🔬 ไมโครมิเตอร์ →</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <header>
+    <h1>🔧 เวอร์เนียร์คาลิเปอร์อัจฉริยะ</h1>
+    <p class="subtitle">สื่อการเรียนรู้ออนไลน์เสมือนจริงระบบสัมผัสความละเอียดสูง</p>
+    <div class="author-tag">
+      ผู้จัดทำ: <strong>ครูธานี ชมสุข</strong> · วิทยาลัยการอาชีพบุรีรัมย์
+    </div>
+  </header>
+
+  <!-- Control panel -->
+  <div class="control-bar">
+    <!-- Mode Panel -->
+    <div class="glass-panel">
+      <div class="panel-title">
+        <span>📏 เลือกระดับความละเอียด (มาตราส่วน)</span>
+      </div>
+      <div class="btn-group">
+        <button class="mode-btn active" id="btn-mm05" onclick="setMode('mm05')">0.05 มม.</button>
+        <button class="mode-btn" id="btn-mm02" onclick="setMode('mm02')">0.02 มม.</button>
+        <button class="mode-btn" id="btn-in128" onclick="setMode('in128')">1/128 นิ้ว</button>
+        <button class="mode-btn" id="btn-in001" onclick="setMode('in001')">0.001 นิ้ว</button>
+      </div>
+    </div>
+    <!-- Object selection Panel -->
+    <div class="glass-panel" style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="panel-title" style="margin-bottom: 2px;">
+        <span>📦 เลือกวัตถุที่ต้องการวัด</span>
+      </div>
+      <select id="objectSelect" onchange="selectObject(this.value)">
+        <option value="none">🔍 วัดแบบอิสระ (ไม่มีวัตถุ)</option>
+        <option value="bolt">🔩 สลักเกลียวเหล็ก (Hex Bolt)</option>
+        <option value="bearing">⚽ ลูกปืนเม็ดกลมขัดเงา (Steel Ball)</option>
+        <option value="nut">🍩 น็อตตัวเมียทองเหลือง (Brass Hex Nut)</option>
+        <option value="pipe">🧪 ท่อเหล็กกลวง (Metal Pipe)</option>
+        <option value="weld_width">⚡ แนวเชื่อม (วัดความกว้างแนวเชื่อม)</option>
+        <option value="weld_length">⚡ แนวเชื่อม (วัดความยาวแนวเชื่อม)</option>
+        <option value="weld_height">⚡ แนวเชื่อม (วัดความนูน/ความสูงแนวเชื่อม)</option>
+      </select>
+      
+      <div style="margin-top: 4px;">
+        <div class="panel-title" style="margin-bottom: 8px;">
+          <span>🔍 ตัวเลือกเลนส์ขยายสเกล</span>
+        </div>
+        <div class="btn-group" style="display: flex; gap: 8px; width: 100%;">
+          <button class="mode-btn" id="btn-zoom-on" onclick="setZoom(true)" style="flex: 1; justify-content: center; display: flex; align-items: center; gap: 4px;">🔍 เปิดเลนส์ขยาย</button>
+          <button class="mode-btn active" id="btn-zoom-off" onclick="setZoom(false)" style="flex: 1; justify-content: center; display: flex; align-items: center; gap: 4px;">❌ ปิดเลนส์ขยาย</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mode-info" id="modeInfo"></div>
+
+  <!-- Interactive Area -->
+  <div class="canvas-container">
+    <canvas id="cv" width="920" height="340"></canvas>
+  </div>
+
+  <div class="slider-row">
+    <label>แถบปรับขนาดละเอียด: <strong id="sliderLabel" style="color: var(--primary);"></strong></label><br>
+    <div class="slider-container">
+      <button class="slider-btn" onclick="adjustMeasure(-1)">-</button>
+      <input type="range" id="slider">
+      <button class="slider-btn" onclick="adjustMeasure(1)">+</button>
+    </div>
+  </div>
+
+  <!-- Reading panel -->
+  <div class="glass-panel reading-panel">
+    <div class="panel-title">
+      <span style="color: var(--primary);">📐 การอ่านค่าทีละขั้นตอน (Step-by-Step)</span>
+    </div>
+    <div class="steps">
+      <div class="step-box">
+        <div class="step-val" id="sv1" style="color: var(--warning);">0.00</div>
+        <div class="step-desc" id="sd1">① มาตราส่วนหลัก<br>ขีดสเกลหลักก่อนเส้น 0 ของสเกลเลื่อน</div>
+      </div>
+      <div class="op">+</div>
+      <div class="step-box">
+        <div class="step-val" id="sv2" style="color: var(--success); font-size: 1.25rem;">0.00</div>
+        <div class="step-desc" id="sd2">② มาตราส่วนเวอร์เนียร์<br>ขีดสเกลเลื่อนที่ตรงกับสเกลหลักพอดี × ความละเอียด</div>
+      </div>
+      <div class="op">=</div>
+      <div class="step-box">
+        <div class="step-val" id="sv3" style="color: var(--primary);">0.00</div>
+        <div class="step-desc">③ ผลรวมที่อ่านได้<br>คำตอบสุดท้ายจากการรวมค่า</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide Panel -->
+  <div class="glass-panel howto" id="howto">
+    <h4>💡 คำอธิบายการอ่านค่าเชิงปฏิบัติงาน</h4>
+    <ol id="howtoList"></ol>
+  </div>
+
+  <!-- Quiz/Practice Panel -->
+  <div class="glass-panel practice-panel">
+    <div class="practice-header">
+      <h3>🎯 แบบทดสอบฝึกอ่านค่าเวอร์เนียร์</h3>
+      <div class="scoreboard">
+        <div class="score-badge" id="scoreBoard">คะแนนสะสม: 0</div>
+        <div class="score-badge" id="attemptBoard" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#90a4ae;">ทำแล้ว: 0 ข้อ</div>
+        <div class="streak-badge" id="streakBoard">🔥 0 COMBO!</div>
+      </div>
+    </div>
+    <p style="color:#90a4ae; font-size:0.85rem;">คลิกที่ปุ่ม "🎲 สุ่มโจทย์ใหม่" เพื่อจำลองขนาดวัตถุแบบสุ่ม จากนั้นอ่านค่าสเกลและกรอกคำตอบเพื่อตรวจคะแนน</p>
+    <div class="input-row">
+      <input type="text" id="answer" placeholder="พิมพ์คำตอบของคุณ">
+      <button class="btn btn-check" onclick="checkAns()">✓ ตรวจสอบคำตอบ</button>
+      <button class="btn btn-new" onclick="newQ()">🎲 สุ่มโจทย์ใหม่</button>
+      <button class="btn" onclick="resetScore()" style="background:rgba(255,70,70,0.12);border:1px solid rgba(255,70,70,0.3);color:#ff6b6b;">🔄 รีเซ็ต</button>
+    </div>
+    <div id="feedback"></div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// MODE CONFIGURATIONS
+// ═══════════════════════════════════════════════════════════════════
+const MODES = {
+  mm05: {
+    id:'mm05', label:'0.05 มม.', unitSuffix:' มม.',
+    vernN:20, mainStep:1, halfStep:0.5,
+    bigAt:10, medAt:5,
+    LC:0.05, pxMm:14.5, viewBias:0.35, maxMm:120,
+    info:'เวอร์เนียร์สเกลแบ่งเป็น 20 ช่อง · ความยาวสเกลรวม 19 มม. · ความละเอียด 1/20 = 0.05 มม.',
+    fmtVal(mm){ return mm.toFixed(2)+' มม.'; },
+    fmtStep(mm){ return mm.toFixed(2); },
+    fmtMain(mm){ if(mm%10===0||mm%5===0) return String(mm); return null; },
+    howto(n,lc){ return [`หาขีดสเกลหลักทางซ้ายที่อยู่ติดกับ <span>ขีด 0 ของสเกลเวอร์เนียร์ (สเกลเลื่อน)</span> → จะได้ค่าหลักเป็น มิลลิเมตร`,`มองหาขีดสเกลเวอร์เนียร์ขีดที่<span>ตรงเป็นเส้นตรงแนวเดียวกันที่สุด</span>กับสเกลหลักบน → ขีดที่ ${n}`,`นำจำนวนขีดที่ตรง (${n}) × ค่าความละเอียด <span>${lc} มม.</span> = ค่าทศนิยม`,`นำค่าหลักที่ได้บวกกับค่าทศนิยมจะได้เป็น <span>ผลลัพธ์การวัดจริง</span>`]; }
+  },
+  mm02: {
+    id:'mm02', label:'0.02 มม.', unitSuffix:' มม.',
+    vernN:50, mainStep:1, halfStep:0.5,
+    bigAt:10, medAt:5,
+    LC:0.02, pxMm:14.5, viewBias:0.06, maxMm:120,
+    info:'เวอร์เนียร์สเกลแบ่งเป็น 50 ช่อง · ความยาวสเกลรวม 49 มม. · ความละเอียด 1/50 = 0.02 มม.',
+    fmtVal(mm){ return mm.toFixed(2)+' มม.'; },
+    fmtStep(mm){ return mm.toFixed(2); },
+    fmtMain(mm){ if(mm%10===0||mm%5===0) return String(mm); return null; },
+    howto(n,lc){ return [`หาขีดสเกลหลักด้านซ้ายที่ใกล้ <span>ขีด 0 สเกลเลื่อน</span> ที่สุด → ได้ค่าหลักหน่วย มิลลิเมตร`,`หาขีดบนสเกลเลื่อนขีดที่ <span>ตรงประกบเป็นแนวเดียว</span> กับสเกลหลักหลักสถิติที่สุด → ขีดที่ ${n}`,`นำจำนวนขีดตรง (${n}) × ค่าความละเอียดสเกล <span>${lc} มม.</span> = ค่าทศนิยมละเอียด`,`รวมทั้งสองค่าเข้าด้วยกัน = <span>ขนาดจริงของชิ้นงาน</span>`]; }
+  },
+  in128: {
+    id:'in128', label:'1/128"', unitSuffix:'"',
+    vernN:8, mainStep:25.4/16, halfStep:null,
+    bigAt:25.4, medAt:25.4/8,
+    LC:25.4/128, pxMm:9.5, viewBias:0.35, maxMm:152.4,
+    info:'ความละเอียดแบบอังกฤษ (นิ้วเศษส่วน) · สเกลเลื่อนแบ่ง 8 ช่องเท่ากับ 7/16 นิ้ว · ความละเอียด 1/128 นิ้ว',
+    fmtVal(mm){ 
+      const total128 = Math.round((mm / 25.4) * 128);
+      const whole = Math.floor(total128 / 128);
+      const frac = total128 % 128;
+      if (frac === 0) return whole + '"';
+      
+      // Reduce fraction
+      const gcd = (a, b) => b ? gcd(b, a % b) : a;
+      const d = gcd(frac, 128);
+      const num = frac / d;
+      const den = 128 / d;
+      
+      const fracStr = num + "/" + den + '"';
+      return whole > 0 ? whole + " " + fracStr : fracStr;
+    },
+    fmtStep(mm){ 
+      const total128 = Math.round((mm / 25.4) * 128);
+      const whole = Math.floor(total128 / 128);
+      const frac = total128 % 128;
+      if (frac === 0) return whole + '"';
+      
+      // Reduce fraction
+      const gcd = (a, b) => b ? gcd(b, a % b) : a;
+      const d = gcd(frac, 128);
+      const num = frac / d;
+      const den = 128 / d;
+      
+      const fracStr = num + "/" + den + '"';
+      return whole > 0 ? whole + " " + fracStr : fracStr;
+    },
+    fmtMain(mm){
+      const inc = mm / 25.4;
+      const sixteenths = Math.round(inc * 16);
+      if (Math.abs(sixteenths - inc * 16) < 0.02) {
+        const frac16 = sixteenths % 16;
+        if (frac16 === 0) return String(sixteenths / 16) + '″';
+        if (frac16 % 2 === 0) {
+          const num = frac16 / 2; // eighths
+          const fractions = ["", "1/8", "1/4", "3/8", "1/2", "5/8", "3/4", "7/8"];
+          return fractions[num] || null;
+        } else {
+          return frac16 + "/16";
+        }
+      }
+      return null;
+    },
+    howto(n,lc){ return [`หา <span>ขีด 0 ของสเกลเลื่อน</span> อยู่เลยช่องสเกลหลักใด (ซึ่งสเกลหลักขีดละ 1/16 นิ้ว)`,`มองหาขีดสเกลเลื่อนขีดที่<span>ตรงแนบชิดเป็นเส้นตรงเดียวกัน</span>กับขีดสเกลหลักพอดี → ขีดที่ ${n}`,`นำจำนวนขีดตรง (${n}) × ค่าความละเอียด <span>1/128 นิ้ว</span> = ส่วนเศษส่วนทศนิยมสะสม`,`รวมผลลัพธ์สเกลหลักและสเกลทศนิยมเพื่ออ่านขนาดผลลัพธ์ในหน่วย <span>นิ้ว (Fractional Inch)</span>`]; }
+  },
+  in001: {
+    id:'in001', label:'0.001"', unitSuffix:'"',
+    vernN:25, mainStep:25.4*0.025, halfStep:null,
+    bigAt:25.4, medAt:25.4*0.1,
+    LC:25.4*0.001, pxMm:13.0, viewBias:0.18, maxMm:152.4,
+    info:'อังกฤษทศนิยม (Micrometer-grade) · สเกลหลักมีขีดละ 0.025" · สเกลเลื่อนแบ่ง 25 ช่อง · ความละเอียด 0.001 นิ้ว',
+    fmtVal(mm){ return (mm/25.4).toFixed(3)+'"'; },
+    fmtStep(mm){ return (mm/25.4).toFixed(3); },
+    fmtMain(mm){
+      const inc=mm/25.4;
+      if(Math.abs(Math.round(inc)-inc)<0.0015) return Math.round(inc).toString();
+      const t=inc*10; if(Math.abs(Math.round(t)-t)<0.015) return '.'+(Math.round(t)%10);
+      return null;
+    },
+    howto(n,lc){ return [`ดูว่า <span>ขีด 0 สเกลเลื่อน</span> อยู่ถัดจากหลักหน่วยทศนิยมเท่าไรของสเกลหลักหลัก (ช่องละ 0.025 นิ้ว)`,`ค้นหาขีดบนสเกลเลื่อนขีดที่ <span>ตรงประกบสเกลหลัก</span> พอดีอย่างสมบูรณ์แบบ → ขีดที่ ${n}`,`นำจำนวนขีดตรง (${n}) × ความละเอียดนิ้วทศนิยม <span>0.001 นิ้ว</span>`,`บวกผลลัพธ์เข้ากันทั้งหมดเพื่อเป็นผลอ่านหน่วย <span>นิ้วทศนิยม (Decimal Inch)</span>`]; }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE & CONFIG
+// ═══════════════════════════════════════════════════════════════════
+let cfg = MODES.mm05;
+let measure = 25.35;
+let practiceMode = false;
+let practiceVal  = 0;
+let currentObject = 'none';
+let showZoom = false;
+
+// Scoreboard tracking
+let score = 0;
+let streak = 0;
+let totalAttempts = 0;
+
+// Canvas Setup
+const cv     = document.getElementById('cv');
+const ctx    = cv.getContext('2d');
+const slider = document.getElementById('slider');
+
+// Snap & Clamp
+function snapTo(v){ return Math.round(v/cfg.LC)*cfg.LC; }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+// Confetti Particle System
+let confettiParticles = [];
+function spawnConfetti() {
+  confettiParticles = [];
+  const colors = ['#00e5ff', '#39ff14', '#ff007f', '#ffb74d', '#ff00ff', '#ffff00'];
+  for (let i = 0; i < 90; i++) {
+    confettiParticles.push({
+      x: cv.width / 2,
+      y: cv.height + 10,
+      vx: (Math.random() - 0.5) * 16,
+      vy: -12 - Math.random() * 12,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: 4 + Math.random() * 6,
+      gravity: 0.35,
+      alpha: 1.0,
+      life: 80 + Math.random() * 50
+    });
+  }
+}
+
+function updateAndDrawConfetti() {
+  if (confettiParticles.length === 0) return;
+  for (let i = confettiParticles.length - 1; i >= 0; i--) {
+    const p = confettiParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += p.gravity;
+    p.alpha = Math.max(0, p.life / 130);
+    p.life--;
+    
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    
+    if (p.life <= 0 || p.y > cv.height + 20) {
+      confettiParticles.splice(i, 1);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// OBJECT DRAWING FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════
+function drawObject(m, fixedX, jawW, slideX) {
+  if (currentObject === 'none') return;
+  
+  const gW = slideX - (fixedX + jawW); // Width of gap
+  if (gW <= 2) return;
+  
+  const midX = (fixedX + jawW + slideX) / 2;
+  const centerY = 58 + 20 + 38; // Adjusted to center precisely inside lower jaws
+  
+  ctx.save();
+  // Draw subtle shadow for the object
+  ctx.shadowColor = 'rgba(0,0,0,0.45)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 6;
+  
+  if (currentObject === 'bearing') {
+    // ⚽ Steel Ball: glossy metallic ball
+    const rad = gW / 2;
+    const grad = ctx.createRadialGradient(midX - rad*0.25, centerY - rad*0.25, rad*0.1, midX, centerY, rad);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.2, '#cfd8dc');
+    grad.addColorStop(0.5, '#78909c');
+    grad.addColorStop(0.8, '#37474f');
+    grad.addColorStop(1, '#1e272c');
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(midX, centerY, rad, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  } 
+  else if (currentObject === 'bolt') {
+    // 🔩 Hex Bolt: hex head on left, threaded shaft in gap
+    const boltH = Math.min(48, Math.max(22, gW * 0.7));
+    const headW = Math.max(15, gW * 0.25);
+    const shaftW = gW - headW;
+    
+    // Draw threaded shaft
+    const shaftGrad = ctx.createLinearGradient(fixedX + jawW + headW, centerY - boltH/2, fixedX + jawW + headW, centerY + boltH/2);
+    shaftGrad.addColorStop(0, '#90a4ae');
+    shaftGrad.addColorStop(0.3, '#eceff1');
+    shaftGrad.addColorStop(0.7, '#455a64');
+    shaftGrad.addColorStop(1, '#263238');
+    
+    ctx.fillStyle = shaftGrad;
+    ctx.fillRect(fixedX + jawW + headW, centerY - boltH/3, shaftW, boltH/1.5);
+    
+    // Thread lines
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 2;
+    const threadSpacing = 6;
+    ctx.beginPath();
+    for (let tx = fixedX + jawW + headW + 2; tx < slideX - 2; tx += threadSpacing) {
+      ctx.moveTo(tx, centerY - boltH/3);
+      ctx.lineTo(tx, centerY + boltH/3);
+    }
+    ctx.stroke();
+    
+    // Draw hex head
+    const headGrad = ctx.createLinearGradient(fixedX + jawW, centerY - boltH/2, fixedX + jawW, centerY + boltH/2);
+    headGrad.addColorStop(0, '#cfd8dc');
+    headGrad.addColorStop(0.5, '#78909c');
+    headGrad.addColorStop(1, '#37474f');
+    
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.moveTo(fixedX + jawW, centerY - boltH/2);
+    ctx.lineTo(fixedX + jawW + headW, centerY - boltH/2.5);
+    ctx.lineTo(fixedX + jawW + headW, centerY + boltH/2.5);
+    ctx.lineTo(fixedX + jawW, centerY + boltH/2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+  else if (currentObject === 'nut') {
+    // 🍩 Hex Nut: Brass hexagon nut
+    const nutH = Math.min(52, Math.max(26, gW * 0.85));
+    const nutGrad = ctx.createLinearGradient(fixedX + jawW, centerY - nutH/2, slideX, centerY + nutH/2);
+    nutGrad.addColorStop(0, '#ffd700'); // gold
+    nutGrad.addColorStop(0.3, '#fff3a0');
+    nutGrad.addColorStop(0.7, '#cc9900');
+    nutGrad.addColorStop(1, '#664c00'); // shadow brass
+    
+    ctx.fillStyle = nutGrad;
+    ctx.beginPath();
+    const radius = gW / 2;
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i;
+      const px = midX + radius * Math.cos(angle);
+      const py = centerY + radius * Math.sin(angle);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+    
+    // Center hole
+    ctx.fillStyle = '#0f1b29';
+    ctx.beginPath();
+    ctx.arc(midX, centerY, radius * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Threads in hole
+    ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(midX, centerY, radius * 0.45 + 1.5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  else if (currentObject === 'pipe') {
+    // 🧪 Steel Pipe: hollow circular cross section
+    const outerRadius = gW / 2;
+    const innerRadius = outerRadius * 0.65;
+    
+    // Outer tube metallic shading
+    const oGrad = ctx.createRadialGradient(midX - outerRadius*0.2, centerY - outerRadius*0.2, outerRadius*0.1, midX, centerY, outerRadius);
+    oGrad.addColorStop(0, '#ffffff');
+    oGrad.addColorStop(0.4, '#b0bec5');
+    oGrad.addColorStop(0.8, '#455a64');
+    oGrad.addColorStop(1, '#263238');
+    
+    ctx.fillStyle = oGrad;
+    ctx.beginPath();
+    ctx.arc(midX, centerY, outerRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Inner hollow space
+    ctx.fillStyle = '#0f1b29';
+    ctx.beginPath();
+    ctx.arc(midX, centerY, innerRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Inner shading ring
+    const iGrad = ctx.createRadialGradient(midX, centerY, innerRadius*0.8, midX, centerY, innerRadius);
+    iGrad.addColorStop(0, 'rgba(0,0,0,0.6)');
+    iGrad.addColorStop(1, 'rgba(255,255,255,0.15)');
+    ctx.fillStyle = iGrad;
+    ctx.beginPath();
+    ctx.arc(midX, centerY, innerRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  else if (currentObject === 'weld_width') {
+    // ⚙️ Weld Bead Width (Vertical Weld Bead): jaws clamp left and right toes
+    // gW represents the width of the vertical weld bead.
+    const plateH = 46;
+    
+    // Left Plate (behind fixed jaw)
+    const leftPlateW = 40;
+    const lpX = (fixedX + jawW) - leftPlateW;
+    const pGradL = ctx.createLinearGradient(lpX, centerY - plateH/2, fixedX + jawW, centerY + plateH/2);
+    pGradL.addColorStop(0, '#37474f');
+    pGradL.addColorStop(0.5, '#78909c');
+    pGradL.addColorStop(1, '#455a64');
+    ctx.fillStyle = pGradL;
+    ctx.fillRect(lpX, centerY - plateH/2, leftPlateW, plateH);
+    
+    // Right Plate (behind sliding jaw)
+    const rpX = slideX;
+    const rightPlateW = 40;
+    const pGradR = ctx.createLinearGradient(rpX, centerY - plateH/2, rpX + rightPlateW, centerY + plateH/2);
+    pGradR.addColorStop(0, '#455a64');
+    pGradR.addColorStop(0.5, '#78909c');
+    pGradR.addColorStop(1, '#37474f');
+    ctx.fillStyle = pGradR;
+    ctx.fillRect(rpX, centerY - plateH/2, rightPlateW, plateH);
+    
+    // Heat Affected Zones (HAZ) adjacent to left and right toes
+    const hazGradL = ctx.createLinearGradient(lpX + leftPlateW - 6, 0, lpX + leftPlateW, 0);
+    hazGradL.addColorStop(0, 'rgba(67, 85, 163, 0)');
+    hazGradL.addColorStop(0.5, 'rgba(103, 58, 183, 0.35)');
+    hazGradL.addColorStop(1, 'rgba(3, 169, 244, 0.3)');
+    ctx.fillStyle = hazGradL;
+    ctx.fillRect(lpX + leftPlateW - 6, centerY - plateH/2, 6, plateH);
+    
+    const hazGradR = ctx.createLinearGradient(rpX, 0, rpX + 6, 0);
+    hazGradR.addColorStop(0, 'rgba(3, 169, 244, 0.3)');
+    hazGradR.addColorStop(0.5, 'rgba(103, 58, 183, 0.35)');
+    hazGradR.addColorStop(1, 'rgba(67, 85, 163, 0)');
+    ctx.fillStyle = hazGradR;
+    ctx.fillRect(rpX, centerY - plateH/2, 6, plateH);
+    
+    // Vertical weld bead crown inside the gap (gW)
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(fixedX + jawW, centerY - plateH/2 - 2, gW, plateH + 4);
+    ctx.clip();
+    
+    // Base weld background with vertical metal gradient
+    const beadGrad = ctx.createLinearGradient(fixedX + jawW, 0, slideX, 0);
+    beadGrad.addColorStop(0, '#455a64');
+    beadGrad.addColorStop(0.15, '#b0bec5');
+    beadGrad.addColorStop(0.5, '#ffffff'); // shiny center crown
+    beadGrad.addColorStop(0.85, '#78909c');
+    beadGrad.addColorStop(1, '#37474f');
+    ctx.fillStyle = beadGrad;
+    ctx.fillRect(fixedX + jawW, centerY - plateH/2 - 2, gW, plateH + 4);
+    
+    // Overlapping horizontal curved ripples running up and down (vertical weld)
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1.2;
+    const rippleSpacing = 5;
+    for (let ry = centerY - plateH/2 - 4; ry < centerY + plateH/2 + 4; ry += rippleSpacing) {
+      ctx.beginPath();
+      // Curved ripple: arc bowing downwards in center
+      ctx.arc(midX, ry - 3, gW * 0.75, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+      
+      // subtle shadow under each ripple
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+      ctx.beginPath();
+      ctx.arc(midX, ry - 2, gW * 0.75, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
+    
+    // Boundary lines (weld toes)
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(lpX, centerY - plateH/2, leftPlateW, plateH);
+    ctx.strokeRect(rpX, centerY - plateH/2, rightPlateW, plateH);
+  }
+  else if (currentObject === 'weld_length') {
+    // ⚙️ Weld Bead Length: V-butt joint with horizontal weld measured
+    const plateH = 46;
+    
+    // Left Plate (behind fixed jaw)
+    const leftPlateW = 40;
+    const lpX = (fixedX + jawW) - leftPlateW;
+    const pGradL = ctx.createLinearGradient(lpX, centerY - plateH/2, fixedX + jawW, centerY + plateH/2);
+    pGradL.addColorStop(0, '#37474f');
+    pGradL.addColorStop(0.5, '#78909c');
+    pGradL.addColorStop(1, '#455a64');
+    ctx.fillStyle = pGradL;
+    ctx.fillRect(lpX, centerY - plateH/2, leftPlateW, plateH);
+    
+    // Right Plate (behind sliding jaw)
+    const rpX = slideX;
+    const rightPlateW = 40;
+    const pGradR = ctx.createLinearGradient(rpX, centerY - plateH/2, rpX + rightPlateW, centerY + plateH/2);
+    pGradR.addColorStop(0, '#455a64');
+    pGradR.addColorStop(0.5, '#78909c');
+    pGradR.addColorStop(1, '#37474f');
+    ctx.fillStyle = pGradR;
+    ctx.fillRect(rpX, centerY - plateH/2, rightPlateW, plateH);
+    
+    // Heat Affected Zone (HAZ) tempering colors (rainbow oxides near toes)
+    // Left HAZ
+    const hazGradL = ctx.createLinearGradient(lpX + leftPlateW - 8, 0, lpX + leftPlateW, 0);
+    hazGradL.addColorStop(0, 'rgba(67, 85, 163, 0)');
+    hazGradL.addColorStop(0.4, 'rgba(103, 58, 183, 0.45)');
+    hazGradL.addColorStop(0.8, 'rgba(3, 169, 244, 0.4)');
+    hazGradL.addColorStop(1, 'rgba(255, 193, 7, 0.2)');
+    ctx.fillStyle = hazGradL;
+    ctx.fillRect(lpX + leftPlateW - 8, centerY - plateH/2, 8, plateH);
+    
+    // Right HAZ
+    const hazGradR = ctx.createLinearGradient(rpX, 0, rpX + 8, 0);
+    hazGradR.addColorStop(0, 'rgba(255, 193, 7, 0.2)');
+    hazGradR.addColorStop(0.2, 'rgba(3, 169, 244, 0.4)');
+    hazGradR.addColorStop(0.6, 'rgba(103, 58, 183, 0.45)');
+    hazGradR.addColorStop(1, 'rgba(67, 85, 163, 0)');
+    ctx.fillStyle = hazGradR;
+    ctx.fillRect(rpX, centerY - plateH/2, 8, plateH);
+    
+    // Draw V-groove weld bead overlapping solidification ripples in the gap
+    ctx.save();
+    // Clip ripples strictly to the gap between jaws
+    ctx.beginPath();
+    ctx.rect(fixedX + jawW, centerY - plateH/2 - 2, gW, plateH + 4);
+    ctx.clip();
+    
+    // Weld Crown Base
+    const beadGrad = ctx.createLinearGradient(fixedX + jawW, centerY - plateH/2, slideX, centerY + plateH/2);
+    beadGrad.addColorStop(0, '#546e7a');
+    beadGrad.addColorStop(0.3, '#b0bec5');
+    beadGrad.addColorStop(0.7, '#78909c');
+    beadGrad.addColorStop(1, '#37474f');
+    ctx.fillStyle = beadGrad;
+    ctx.fillRect(fixedX + jawW, centerY - plateH/2 - 2, gW, plateH + 4);
+    
+    // TIG/SMAW overlapping curved ripples
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1.5;
+    const rippleSpacing = 6;
+    for (let rx = fixedX + jawW - rippleSpacing; rx < slideX + rippleSpacing; rx += rippleSpacing) {
+      ctx.beginPath();
+      ctx.arc(rx, centerY, plateH * 0.75, -Math.PI/3.2, Math.PI/3.2);
+      ctx.stroke();
+      
+      const rGrad = ctx.createRadialGradient(rx, centerY, 5, rx, centerY, plateH * 0.75);
+      rGrad.addColorStop(0, 'rgba(255,255,255,0.06)');
+      rGrad.addColorStop(0.8, 'rgba(0,0,0,0.12)');
+      rGrad.addColorStop(1, 'rgba(0,0,0,0.32)');
+      ctx.fillStyle = rGrad;
+      ctx.beginPath();
+      ctx.arc(rx, centerY, plateH * 0.75, -Math.PI/3.2, Math.PI/3.2);
+      ctx.lineTo(rx - rippleSpacing, centerY + plateH * 0.75 * Math.sin(Math.PI/3.2));
+      ctx.arc(rx - rippleSpacing, centerY, plateH * 0.75, Math.PI/3.2, -Math.PI/3.2, true);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+    
+    // Borders
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(lpX, centerY - plateH/2, leftPlateW, plateH);
+    ctx.strokeRect(rpX, centerY - plateH/2, rightPlateW, plateH);
+  }
+  else if (currentObject === 'weld_height') {
+    // ⚙️ Weld Reinforcement Height: vertical plate on the left, convex bead dome measured
+    const plateH = 50;
+    const plateW = 20;
+    
+    // Draw vertical plate (touching the fixed jaw)
+    const pGrad = ctx.createLinearGradient(fixedX + jawW - plateW, centerY - plateH/2, fixedX + jawW, centerY + plateH/2);
+    pGrad.addColorStop(0, '#37474f');
+    pGrad.addColorStop(0.5, '#90a4ae');
+    pGrad.addColorStop(1, '#263238');
+    ctx.fillStyle = pGrad;
+    ctx.fillRect(fixedX + jawW - plateW, centerY - plateH/2, plateW, plateH);
+    
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(fixedX + jawW - plateW, centerY - plateH/2, plateW, plateH);
+    
+    // Convex Weld bead reinforcement (width of dome = gW)
+    const beadH = 34;
+    ctx.save();
+    
+    const wGrad = ctx.createLinearGradient(fixedX + jawW, centerY, slideX, centerY);
+    wGrad.addColorStop(0, '#78909c');
+    wGrad.addColorStop(0.2, '#b0bec5');
+    wGrad.addColorStop(0.5, '#ffffff'); // shiny peak
+    wGrad.addColorStop(0.8, '#607d8b');
+    wGrad.addColorStop(1, '#37474f');
+    ctx.fillStyle = wGrad;
+    
+    ctx.beginPath();
+    ctx.moveTo(fixedX + jawW, centerY - beadH/2);
+    ctx.bezierCurveTo(
+      fixedX + jawW + gW * 0.45, centerY - beadH/2,
+      slideX, centerY - beadH/3,
+      slideX, centerY
+    );
+    ctx.bezierCurveTo(
+      slideX, centerY + beadH/3,
+      fixedX + jawW + gW * 0.45, centerY + beadH/2,
+      fixedX + jawW, centerY + beadH/2
+    );
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // Texture lines for the weld ripples
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 1;
+    for (let rx = fixedX + jawW + 3; rx < slideX - 2; rx += 4.5) {
+      ctx.beginPath();
+      const factor = (rx - (fixedX + jawW)) / gW;
+      const currH = beadH * (1 - factor * 0.6);
+      ctx.moveTo(rx, centerY - currH/2 + 2);
+      ctx.lineTo(rx, centerY + currH/2 - 2);
+      ctx.stroke();
+    }
+    
+    // Small HAZ glow near toes
+    ctx.fillStyle = 'rgba(103, 58, 183, 0.22)';
+    ctx.beginPath(); ctx.arc(fixedX + jawW, centerY - beadH/2, 6, -Math.PI/2, Math.PI/2); ctx.fill();
+    ctx.beginPath(); ctx.arc(fixedX + jawW, centerY + beadH/2, 6, -Math.PI/2, Math.PI/2); ctx.fill();
+    
+    ctx.restore();
+  }
+  
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GRAPHICS RENDERING (CANVAS)
+// ═══════════════════════════════════════════════════════════════════
+function draw(m){
+  const W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  
+  // Ambient glow background
+  ctx.fillStyle='#0f1b29'; ctx.fillRect(0,0,W,H);
+  
+  // Grid Lines background
+  ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 30) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 30) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Draw simulation objects in jaw
+  const barY=58, barH=20, fixedX=60, jawW=52, jawH=78;
+  const pxPmm=(W-180)/cfg.maxMm;
+  const slideX=fixedX+jawW+m*pxPmm;
+  
+  drawObject(m, fixedX, jawW, slideX);
+  
+  // Draw Caliper body shapes
+  drawCaliperBody(m, W, slideX, fixedX, jawW, jawH, barY, barH);
+  
+  // Draw Scales
+  drawScales(m, W, H);
+  
+  // Update particles
+  updateAndDrawConfetti();
+  
+  // Request next frame if particles are running
+  if (confettiParticles.length > 0) {
+    requestAnimationFrame(() => draw(measure));
+  }
+}
+
+function drawCaliperBody(m, W, slideX, fixedX, jawW, jawH, barY, barH) {
+  ctx.save();
+  const pxPmm=(W-180)/cfg.maxMm;
+  
+  // ── Steel Gradients ──────────────────────────────────────────────
+  const steelGradFixed = ctx.createLinearGradient(fixedX, barY - jawH + barH, fixedX + jawW, barY + barH + jawH + 20);
+  steelGradFixed.addColorStop(0, '#ffffff');
+  steelGradFixed.addColorStop(0.2, '#eceff1');
+  steelGradFixed.addColorStop(0.5, '#b0bec5');
+  steelGradFixed.addColorStop(0.8, '#78909c');
+  steelGradFixed.addColorStop(1, '#37474f');
+  
+  const steelGradSlide = ctx.createLinearGradient(slideX, barY - jawH + barH, slideX + jawW, barY + barH + jawH + 20);
+  steelGradSlide.addColorStop(0, '#ffffff');
+  steelGradSlide.addColorStop(0.2, '#cfd8dc');
+  steelGradSlide.addColorStop(0.5, '#90a4ae');
+  steelGradSlide.addColorStop(0.8, '#607d8b');
+  steelGradSlide.addColorStop(1, '#455a64');
+  
+  const steelBeamGrad = ctx.createLinearGradient(fixedX, barY, slideX + jawW + 150, barY + barH);
+  steelBeamGrad.addColorStop(0, '#cfd8dc');
+  steelBeamGrad.addColorStop(0.1, '#ffffff');
+  steelBeamGrad.addColorStop(0.4, '#b0bec5');
+  steelBeamGrad.addColorStop(0.8, '#78909c');
+  steelBeamGrad.addColorStop(1, '#455a64');
+  
+  // ── 1. Main Beam (Fixed Scale Bar) ───────────────────────────────
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  
+  // Draw main scale sliding groove
+  rr(ctx, fixedX, barY, W - 100 - fixedX, barH, 4, steelBeamGrad, '#37474f');
+  
+  // Draw mini scale ticks directly on the main beam
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+  ctx.lineWidth = 1;
+  ctx.font = 'bold 8px Inter';
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  
+  for (let mm = 0; mm <= cfg.maxMm; mm += 1) {
+    const tx = fixedX + jawW + mm * pxPmm;
+    if (tx > W - 110) break;
+    
+    ctx.beginPath();
+    ctx.moveTo(tx, barY);
+    if (mm % 10 === 0) {
+      ctx.lineTo(tx, barY + 7);
+      ctx.stroke();
+      ctx.fillText(mm, tx, barY + 16);
+    } else if (mm % 5 === 0) {
+      ctx.lineTo(tx, barY + 5);
+      ctx.stroke();
+    } else {
+      ctx.lineTo(tx, barY + 3.5);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+  
+  // ── 2. Fixed Jaws (Solid flat parallel internal/external jaws) ───
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 3;
+  
+  // Fixed Lower Jaw: perfectly vertical measuring face on the right (x = fixedX + jawW)
+  ctx.fillStyle = steelGradFixed;
+  ctx.strokeStyle = '#263238';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(fixedX + 15, barY + barH);
+  ctx.lineTo(fixedX + 15, barY + barH + 15);
+  ctx.bezierCurveTo(fixedX + 15, barY + barH + 45, fixedX + jawW - 12, barY + barH + 65, fixedX + jawW - 8, barY + barH + 75);
+  ctx.lineTo(fixedX + jawW, barY + barH + 75); // Flat tip
+  ctx.lineTo(fixedX + jawW, barY + barH); // Straight vertical inner measuring face!
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  
+  // Fixed Upper Jaw: scissor-blade design with perfectly straight vertical inner face and curved outer back
+  ctx.beginPath();
+  ctx.moveTo(fixedX + 15, barY);
+  ctx.bezierCurveTo(fixedX + 15, barY - 20, fixedX + jawW - 12, barY - 25, fixedX + jawW - 8, barY - 30); // Curved outer back face
+  ctx.lineTo(fixedX + jawW - 8, barY - 45); // Flat vertical measuring edge (outward left)
+  ctx.lineTo(fixedX + jawW, barY - 45); // Top edge of tip
+  ctx.lineTo(fixedX + jawW, barY); // Straight vertical inner face
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  
+  // ── 3. Sliding Jaws (Offset at slideX, face-to-face mirror) ──────
+  // Sliding Lower Jaw: perfectly vertical measuring face on the left (x = slideX)
+  ctx.fillStyle = steelGradSlide;
+  ctx.beginPath();
+  ctx.moveTo(slideX, barY + barH); // Straight vertical inner measuring face!
+  ctx.lineTo(slideX, barY + barH + 75); // Flat tip
+  ctx.lineTo(slideX + 8, barY + barH + 75);
+  ctx.bezierCurveTo(slideX + 12, barY + barH + 65, slideX + jawW - 15, barY + barH + 45, slideX + jawW - 15, barY + barH + 15);
+  ctx.lineTo(slideX + jawW - 15, barY + barH);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  
+  // Sliding Upper Jaw: scissor-blade design with perfectly straight vertical inner face and curved outer back
+  ctx.beginPath();
+  ctx.moveTo(slideX, barY);
+  ctx.lineTo(slideX, barY - 45); // Straight vertical inner face
+  ctx.lineTo(slideX + 8, barY - 45); // Top edge of tip
+  ctx.lineTo(slideX + 8, barY - 30); // Flat vertical measuring edge (outward right)
+  ctx.bezierCurveTo(slideX + 8, barY - 25, slideX + 25, barY - 20, slideX + 25, barY); // Curved outer back face
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  
+  ctx.restore();
+  
+  // ── 4. Slider Vernier Housing Plate (covering the beam) ──────────
+  const vHousingW = jawW + 20;
+  const vHousingGrad = ctx.createLinearGradient(slideX - 10, barY - 14, slideX + vHousingW, barY + barH + 14);
+  vHousingGrad.addColorStop(0, '#ffffff');
+  vHousingGrad.addColorStop(0.3, '#e0e0e0');
+  vHousingGrad.addColorStop(0.7, '#b0bec5');
+  vHousingGrad.addColorStop(1, '#78909c');
+  
+  rr(ctx, slideX - 12, barY - 10, vHousingW + 4, barH + 20, 6, vHousingGrad, '#37474f');
+  
+  // Draw mini vernier scale ticks on the sliding housing plate
+  ctx.save();
+  ctx.strokeStyle = 'rgba(13,71,161,0.85)';
+  ctx.lineWidth = 1;
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+  
+  for (let d = 0; d <= cfg.vernN; d++) {
+    const vx = slideX + d * ((cfg.vernN - 1) / cfg.vernN * cfg.mainStep * pxPmm);
+    if (vx > slideX + vHousingW - 2) break;
+    ctx.beginPath();
+    ctx.moveTo(vx, barY + barH);
+    if (d === 0 || d === cfg.vernN || d % (cfg.vernN / 2) === 0 || (cfg.vernN <= 10 && d % 2 === 0) || (cfg.vernN === 25 && d % 5 === 0)) {
+      ctx.lineTo(vx, barY + barH - 6.5);
+    } else {
+      ctx.lineTo(vx, barY + barH - 4);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+  
+  // Brass locking screw on top
+  ctx.fillStyle = 'radial-gradient(circle at center, #ffd700, #996600)';
+  rr(ctx, slideX + 15, barY - 18, 18, 8, 2, '#cc9900', '#664c00');
+  
+  // Thumb Adjustment Wheel at the bottom right of the housing
+  const wheelX = slideX + vHousingW - 8;
+  const wheelY = barY + barH + 10;
+  const wheelGrad = ctx.createLinearGradient(wheelX - 8, wheelY, wheelX + 8, wheelY);
+  wheelGrad.addColorStop(0, '#78909c');
+  wheelGrad.addColorStop(0.5, '#eceff1');
+  wheelGrad.addColorStop(1, '#37474f');
+  rr(ctx, wheelX - 8, wheelY, 16, 12, 2, wheelGrad, '#263238');
+  
+  // Ridges on wheel
+  ctx.strokeStyle = '#263238';
+  ctx.lineWidth = 1;
+  for (let rx = wheelX - 6; rx <= wheelX + 6; rx += 3) {
+    ctx.beginPath(); ctx.moveTo(rx, wheelY); ctx.lineTo(rx, wheelY + 12); ctx.stroke();
+  }
+  
+  // ── Labels & Aesthetics ──────────────────────────────────────────
+  const labelY = barY + barH + 26;
+  const tickY0 = barY + barH + 3, tickY1 = barY + barH + 15;
+  ctx.font = 'bold 11px Sarabun'; ctx.lineWidth = 1.5;
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+  
+  // Main scale (fixed) pointer
+  const fxCx = fixedX + jawW / 2;
+  ctx.strokeStyle = 'rgba(255,183,77,0.85)';
+  ctx.beginPath(); ctx.moveTo(fxCx, tickY0); ctx.lineTo(fxCx, tickY1); ctx.stroke();
+  ctx.fillStyle = '#ffb74d'; ctx.textAlign = 'center';
+  ctx.fillText('สเกลหลัก', fxCx, labelY);
+  
+  // Vernier scale (sliding) pointer
+  const slCx = slideX + jawW / 2;
+  ctx.strokeStyle = 'rgba(0,229,255,0.85)';
+  ctx.beginPath(); ctx.moveTo(slCx, tickY0); ctx.lineTo(slCx, tickY1); ctx.stroke();
+  ctx.fillStyle = '#00e5ff'; ctx.textAlign = 'center';
+  ctx.fillText('สเกลเลื่อน', slCx, labelY);
+  
+  // Draw Gap dimension helper arrow
+  if(m>1){
+    const lx1=fixedX+jawW, lx2=Math.min(slideX, W-140);
+    ctx.fillStyle='rgba(0, 229, 255, 0.08)';
+    ctx.fillRect(lx1, barY-jawH+barH+14, lx2-lx1, jawH-20);
+    ctx.strokeStyle='rgba(0, 229, 255, 0.35)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.strokeRect(lx1, barY-jawH+barH+14, lx2-lx1, jawH-20); ctx.setLineDash([]);
+    
+    const helperY = barY - 26; // Perfectly centered inside the upper jaws!
+    arrowH(lx1, helperY, 'R'); arrowH(lx2, helperY, 'L');
+    ctx.strokeStyle='#00e5ff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(lx1+9, helperY); ctx.lineTo(lx2-9, helperY); ctx.stroke();
+    
+    ctx.fillStyle='#00e5ff'; ctx.font='bold 12px Inter'; ctx.textAlign='center';
+    ctx.fillText(cfg.fmtVal(m), (lx1+lx2)/2, helperY - 5);
+  }
+  
+  ctx.restore();
+}
+
+function drawScales(m,W,H){
+  const TOP=148, BOT=H-12;
+  const MH=Math.round((BOT-TOP)*0.50);
+  const VH=BOT-TOP-MH;
+  const VY=TOP+MH;
+  const PX=cfg.pxMm;
+
+  const VIEW_MM=(W-60)/PX;
+  const viewStart=clamp(m-VIEW_MM*cfg.viewBias, 0, cfg.maxMm);
+  const mmToX=mm=>30+(mm-viewStart)*PX;
+
+  // Background for main scale
+  rr(ctx, 20, TOP, W-40, MH, [6,6,0,0], '#cfd8dc', '#90a4ae');
+
+  // Background for vernier scale
+  const v0x=mmToX(m);
+  const vernSpan=(cfg.vernN-1)*cfg.mainStep;
+  const vernW=vernSpan*PX;
+  
+  // Metallic shading on Vernier plate
+  const vernGrad = ctx.createLinearGradient(v0x-4, VY, v0x+vernW+8, BOT);
+  vernGrad.addColorStop(0, '#e3f2fd');
+  vernGrad.addColorStop(0.3, '#bbdefb');
+  vernGrad.addColorStop(0.7, '#90caf9');
+  vernGrad.addColorStop(1, '#64b5f6');
+  
+  rr(ctx, v0x-4, VY, vernW+8, VH, [0,0,6,6], vernGrad, '#1565c0');
+
+  // Coinciding calculations
+  const mainVal = Math.floor(m/cfg.mainStep)*cfg.mainStep;
+  const dec = m - mainVal;
+  const coin = Math.round(dec/cfg.LC);
+  const vdiv = (cfg.vernN-1)/cfg.vernN*cfg.mainStep*PX; // px per vernier div
+
+  // Coinciding red glow line
+  let coincidingX = v0x + coin * vdiv;
+  if(coin>0 && coin <= cfg.vernN){
+    ctx.fillStyle='rgba(255, 0, 127, 0.08)'; ctx.fillRect(coincidingX-9, TOP, 18, BOT-TOP);
+    ctx.strokeStyle='rgba(255, 0, 127, 0.6)'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(coincidingX, TOP); ctx.lineTo(coincidingX, BOT); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // ── MAIN SCALE TICKS ─────────────────────────────────────────────
+  const msStep  = cfg.mainStep;
+  const bigAtN  = Math.round(cfg.bigAt / msStep);
+  const medAtN  = Math.round(cfg.medAt / msStep);
+  const firstIdx = Math.ceil(viewStart / msStep);
+  const lastIdx  = Math.ceil((viewStart + VIEW_MM + msStep) / msStep);
+  
+  for(let idx = firstIdx; idx <= lastIdx; idx++){
+    const mm = idx * msStep;
+    const x  = mmToX(mm); if(x < 18 || x > W-18) continue;
+    const isBig = (idx % bigAtN === 0);
+    const isMed = !isBig && (idx % medAtN === 0);
+    
+    ctx.strokeStyle = isBig ? '#000' : '#333';
+    ctx.lineWidth   = isBig ? 1.5 : 1;
+    ctx.beginPath(); ctx.moveTo(x, VY);
+    
+    if(isBig){
+      ctx.lineTo(x, TOP+MH*0.08); ctx.stroke();
+      const lbl = cfg.fmtMain(mm);
+      if(lbl){ ctx.fillStyle='#000'; ctx.font='bold 11px Inter'; ctx.textAlign='center'; ctx.fillText(lbl, x, TOP+13); }
+    } else if(isMed){
+      ctx.lineTo(x, TOP+MH*0.28); ctx.stroke();
+      const lbl = cfg.fmtMain(mm);
+      if(lbl){ ctx.fillStyle='#222'; ctx.font='9px Inter'; ctx.textAlign='center'; ctx.fillText(lbl, x, TOP+13); }
+    } else {
+      ctx.lineTo(x, TOP+MH*0.48); ctx.stroke();
+      if (cfg.id === 'in128') {
+        const lbl = cfg.fmtMain(mm);
+        if (lbl) {
+          ctx.fillStyle = '#546e7a'; ctx.font = '8px Inter';
+          ctx.textAlign = 'center'; ctx.fillText(lbl, x, TOP+23);
+        }
+      }
+    }
+  }
+  
+  // half-step marks (mm modes only)
+  if(cfg.halfStep){
+    for(let mm=Math.ceil(viewStart/cfg.halfStep)*cfg.halfStep; mm<=viewStart+VIEW_MM; mm+=cfg.halfStep){
+      if(Math.abs(mm%msStep)<0.001) continue;
+      const x=mmToX(mm); if(x<18||x>W-18) continue;
+      ctx.strokeStyle='#444'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,VY); ctx.lineTo(x,TOP+MH*0.62); ctx.stroke();
+    }
+  }
+
+  // ── VERNIER TICKS ────────────────────────────────────────────────
+  for(let d=0; d<=cfg.vernN; d++){
+    const x=v0x+d*vdiv; if(x<18||x>W-18) continue;
+    const isCoin=(d===coin);
+    ctx.strokeStyle=isCoin?'#e91e63':'#0d47a1';
+    ctx.lineWidth=isCoin?2.5:1;
+    
+    // Determine the type of line and label for the vernier scale
+    let tickHeight = 0.42; // Short tick (default)
+    let label = '';
+    
+    if (cfg.id === 'mm05') {
+      if (d % 2 === 0) {
+        tickHeight = 0.78; // Long tick
+        label = d === 20 ? '0' : String(d / 2);
+      }
+    } else if (cfg.id === 'mm02') {
+      if (d % 5 === 0) {
+        tickHeight = 0.78; // Long tick
+        label = d === 50 ? '0' : String(d / 5);
+      }
+    } else if (cfg.id === 'in128') {
+      if (d % 4 === 0) {
+        tickHeight = 0.78; // Long tick
+        label = String(d);
+      } else if (d % 2 === 0) {
+        tickHeight = 0.60; // Medium tick
+      }
+    } else if (cfg.id === 'in001') {
+      if (d % 5 === 0) {
+        tickHeight = 0.78; // Long tick
+        label = String(d);
+      }
+    }
+    
+    // Force longest ticks at endpoints
+    if (d === 0 || d === cfg.vernN) {
+      tickHeight = 0.82;
+      label = d === 0 ? '0' : (cfg.id === 'mm05' || cfg.id === 'mm02' ? '0' : String(d));
+    }
+    
+    ctx.beginPath(); ctx.moveTo(x,VY);
+    ctx.lineTo(x, VY + VH * tickHeight);
+    ctx.stroke();
+    
+    if (label !== '') {
+      ctx.fillStyle=isCoin?'#e91e63':'#0d47a1';
+      ctx.font=(isCoin || d === 0 || d === cfg.vernN)?'bold 11px Inter':'10px Inter';
+      ctx.textAlign='center';
+      ctx.fillText(label, x, BOT-4);
+    }
+    
+    // Glowing red triangle overlay for the coinciding line
+    if(isCoin&&d>0&&d<cfg.vernN){
+      ctx.fillStyle='#ff007f'; ctx.beginPath();
+      ctx.moveTo(x,VY+3); ctx.lineTo(x-6,VY-9); ctx.lineTo(x+6,VY-9);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // Interface dividing line
+  ctx.strokeStyle='#455a64'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(20,VY); ctx.lineTo(W-20,VY); ctx.stroke();
+
+  // Legend labels
+  ctx.fillStyle='#e65100'; ctx.font='bold 11px Sarabun'; ctx.textAlign='left';
+  ctx.fillText('▲ มาตราส่วนหลัก (Main Scale)', 28, VY-8);
+  ctx.fillStyle='#0d47a1'; ctx.font='bold 11px Sarabun';
+  ctx.fillText('▼ เวอร์เนียร์สเกล  ← ขีดที่ '+coin+' ตรงแนวกันสนิทที่สุด', 28, VY+16);
+
+  // Box border
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=2;
+  rr(ctx,20,TOP,W-40,BOT-TOP,6,null,'#1565c0');
+
+  // ── 5. FLOATING DYNAMIC ZOOM LENS (Only if showZoom is true) ─────
+  if (showZoom && coin >= 0 && coin <= cfg.vernN) {
+    try {
+      drawZoomLens(coincidingX, VY, m, v0x, vdiv, W, mmToX);
+    } catch (e) {
+      console.error("Zoom lens rendering failed:", e);
+      // Safeguard: force restore canvas stack in case of failure inside clip block
+      ctx.restore();
+      ctx.restore();
+    }
+  }
+}
+
+// ── Magnifying Zoom Lens drawing ────────────────────────────────────
+function drawZoomLens(ax, cy, m, v0x, vdiv, W, mmToX) {
+  if (isNaN(ax) || isNaN(cy) || isNaN(m) || isNaN(v0x) || isNaN(vdiv) || isNaN(W) || !mmToX) {
+    return;
+  }
+  // Clamp lens x to stay inside the canvas boundary safely
+  const lensRadius = 68;
+  const lensX = clamp(ax, 20 + lensRadius + 10, W - 20 - lensRadius - 10);
+  const lensY = cy;
+  
+  ctx.save();
+  
+  // Step 1: Draw Drop Shadow for Lens
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetX = 4;
+  ctx.shadowOffsetY = 8;
+  
+  // Step 2: Create Circular Clip Path for zoomed content
+  ctx.beginPath();
+  ctx.arc(lensX, lensY, lensRadius, 0, Math.PI*2);
+  ctx.fillStyle = '#111922';
+  ctx.fill();
+  
+  ctx.shadowColor = 'transparent'; // Reset shadows
+  
+  ctx.save();
+  ctx.clip(); // Clip all subsequent drawing inside the lens circle
+  
+  // Zoom metrics
+  const zFactor = 2.1; // Zoom magnification power
+  const zPX = cfg.pxMm * zFactor;
+  const zVdiv = vdiv * zFactor;
+  const zV0x = lensX + (v0x - ax) * zFactor;
+  const zMSstep = cfg.mainStep;
+  
+  // Main Scale zoomed background
+  ctx.fillStyle = '#eceff1';
+  ctx.fillRect(lensX - lensRadius, lensY - lensRadius, lensRadius*2, lensRadius);
+  
+  // Vernier Scale zoomed background
+  const vernGrad = ctx.createLinearGradient(lensX - lensRadius, lensY, lensX + lensRadius, lensY + lensRadius);
+  vernGrad.addColorStop(0, '#e3f2fd');
+  vernGrad.addColorStop(1, '#90caf9');
+  ctx.fillStyle = vernGrad;
+  ctx.fillRect(lensX - lensRadius, lensY, lensRadius*2, lensRadius);
+  
+  // Midline
+  ctx.strokeStyle = '#37474f'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(lensX - lensRadius, lensY); ctx.lineTo(lensX + lensRadius, lensY); ctx.stroke();
+  
+  // Draw zoomed Main Scale Ticks - Mathematically synchronized to eliminate shift
+  const bigAtN = Math.round(cfg.bigAt / zMSstep);
+  const medAtN = Math.round(cfg.medAt / zMSstep);
+  
+  const firstIdx = Math.floor((m - 5) / zMSstep);
+  const lastIdx = Math.ceil((m + 5) / zMSstep);
+  
+  for(let idx = firstIdx; idx <= lastIdx; idx++){
+    const mm = idx * zMSstep;
+    // Pure mathematical alignment relative to center of zoom (using passed mmToX function)
+    const zoomX = lensX + (mmToX(mm) - ax) * zFactor;
+    
+    if (Math.abs(zoomX - lensX) > lensRadius + 20) continue;
+    
+    const isBig = (idx % bigAtN === 0);
+    const isMed = !isBig && (idx % medAtN === 0);
+    
+    ctx.strokeStyle = isBig ? '#000' : '#444';
+    ctx.lineWidth = isBig ? 3.0 : 1.5;
+    ctx.beginPath();
+    ctx.moveTo(zoomX, lensY);
+    
+    if (isBig) {
+      ctx.lineTo(zoomX, lensY - lensRadius * 0.7); ctx.stroke();
+      const lbl = cfg.fmtMain(mm);
+      if (lbl) {
+        ctx.fillStyle = '#000'; ctx.font = 'bold 12px Inter';
+        ctx.textAlign = 'center'; ctx.fillText(lbl, zoomX, lensY - lensRadius * 0.75);
+      }
+    } else if (isMed) {
+      ctx.lineTo(zoomX, lensY - lensRadius * 0.5); ctx.stroke();
+      const lbl = cfg.fmtMain(mm);
+      if (lbl) {
+        ctx.fillStyle = '#222'; ctx.font = '10px Inter';
+        ctx.textAlign = 'center'; ctx.fillText(lbl, zoomX, lensY - lensRadius * 0.56);
+      }
+    } else {
+      ctx.lineTo(zoomX, lensY - lensRadius * 0.35); ctx.stroke();
+      if (cfg.id === 'in128') {
+        const lbl = cfg.fmtMain(mm);
+        if (lbl) {
+          ctx.fillStyle = '#546e7a'; ctx.font = '9px Inter';
+          ctx.textAlign = 'center'; ctx.fillText(lbl, zoomX, lensY - lensRadius * 0.41);
+        }
+      }
+    }
+  }
+  
+  // Draw zoomed Vernier Ticks
+  const mainVal = Math.floor(m/cfg.mainStep)*cfg.mainStep;
+  const dec = m - mainVal;
+  const coin = Math.round(dec/cfg.LC);
+  
+  for(let d=0; d<=cfg.vernN; d++){
+    // Pure mathematical alignment relative to center of zoom
+    const zoomVX = lensX + ((v0x + d * vdiv) - ax) * zFactor;
+    if (Math.abs(zoomVX - lensX) > lensRadius + 20) continue;
+    
+    const isCoin = (d === coin);
+    ctx.strokeStyle = isCoin ? '#ff007f' : '#0d47a1';
+    ctx.lineWidth = isCoin ? 4.0 : 1.5;
+    
+    // Determine the type of line and label for zoomed lens
+    let tickHeight = 0.4; // Short tick (default)
+    let label = '';
+    
+    if (cfg.id === 'mm05') {
+      if (d % 2 === 0) {
+        tickHeight = 0.65; // Long tick
+        label = d === 20 ? '0' : String(d / 2);
+      }
+    } else if (cfg.id === 'mm02') {
+      if (d % 5 === 0) {
+        tickHeight = 0.65; // Long tick
+        label = d === 50 ? '0' : String(d / 5);
+      }
+    } else if (cfg.id === 'in128') {
+      if (d % 4 === 0) {
+        tickHeight = 0.65; // Long tick
+        label = String(d);
+      } else if (d % 2 === 0) {
+        tickHeight = 0.5; // Medium tick
+      }
+    } else if (cfg.id === 'in001') {
+      if (d % 5 === 0) {
+        tickHeight = 0.65; // Long tick
+        label = String(d);
+      }
+    }
+    
+    // Force longest ticks at endpoints
+    if (d === 0 || d === cfg.vernN) {
+      tickHeight = 0.65;
+      label = d === 0 ? '0' : (cfg.id === 'mm05' || cfg.id === 'mm02' ? '0' : String(d));
+    }
+    
+    ctx.beginPath();
+    ctx.moveTo(zoomVX, lensY);
+    ctx.lineTo(zoomVX, lensY + lensRadius * tickHeight);
+    ctx.stroke();
+    
+    if (label !== '') {
+      ctx.fillStyle = isCoin ? '#ff007f' : '#0d47a1';
+      ctx.font = 'bold 11px Inter'; ctx.textAlign = 'center';
+      ctx.fillText(label, zoomVX, lensY + lensRadius * 0.85);
+    }
+    
+    // Zoomed red coincide arrow
+    if(isCoin && d > 0 && d < cfg.vernN){
+      ctx.fillStyle = '#ff007f'; ctx.beginPath();
+      ctx.moveTo(zoomVX, lensY + 5);
+      ctx.lineTo(zoomVX - 8, lensY - 8);
+      ctx.lineTo(zoomVX + 8, lensY - 8);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  
+  // Precise hairline indicator in center of magnifying lens
+  ctx.strokeStyle = '#e91e63'; ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(lensX, lensY - lensRadius); ctx.lineTo(lensX, lensY + lensRadius); ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Highlight glass shine inside lens
+  const glassShine = ctx.createLinearGradient(lensX - lensRadius, lensY - lensRadius, lensX + lensRadius, lensY + lensRadius);
+  glassShine.addColorStop(0, 'rgba(255,255,255,0.22)');
+  glassShine.addColorStop(0.4, 'rgba(255,255,255,0.02)');
+  glassShine.addColorStop(0.7, 'rgba(0,0,0,0.05)');
+  glassShine.addColorStop(1, 'rgba(0,0,0,0.25)');
+  ctx.fillStyle = glassShine;
+  ctx.beginPath();
+  ctx.arc(lensX, lensY, lensRadius, 0, Math.PI*2);
+  ctx.fill();
+  
+  ctx.restore(); // Restore clip path
+  
+  // Step 3: Draw a premium brass/chrome border ring around the lens
+  const ringGrad = ctx.createLinearGradient(lensX - lensRadius, lensY - lensRadius, lensX + lensRadius, lensY + lensRadius);
+  ringGrad.addColorStop(0, '#00e5ff');
+  ringGrad.addColorStop(0.3, '#005b66');
+  ringGrad.addColorStop(0.5, '#00e5ff');
+  ringGrad.addColorStop(0.8, '#0d1b2a');
+  ringGrad.addColorStop(1, '#00e5ff');
+  
+  ctx.strokeStyle = ringGrad;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(lensX, lensY, lensRadius + 2.5, 0, Math.PI*2);
+  ctx.stroke();
+  
+  // Inner bezel shadow
+  ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(lensX, lensY, lensRadius, 0, Math.PI*2);
+  ctx.stroke();
+  
+  // Text label: "ซูมจุดประจบ"
+  ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 9px Sarabun'; ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.6)'; ctx.shadowBlur = 4;
+  ctx.fillText('เลนส์ซูมขยายสเกล', lensX, lensY - lensRadius - 8);
+  
+  ctx.restore();
+}
+
+// Helper arrow draw
+function arrowH(x,y,dir){
+  const s=6; ctx.fillStyle='#00e5ff'; ctx.beginPath();
+  if(dir==='R'){ctx.moveTo(x,y);ctx.lineTo(x-s,y-s/1.8);ctx.lineTo(x-s,y+s/1.8);}
+  else         {ctx.moveTo(x,y);ctx.lineTo(x+s,y-s/1.8);ctx.lineTo(x+s,y+s/1.8);}
+  ctx.closePath();ctx.fill();
+}
+
+// rounded rect helper
+function rr(ctx,x,y,w,h,r,fill,stroke){
+  const rv=typeof r==='number'?[r,r,r,r]:r.map(v => v === 0 ? 0.1 : v);
+  ctx.beginPath();
+  ctx.moveTo(x+rv[0],y);
+  ctx.lineTo(x+w-rv[1],y);   ctx.arcTo(x+w,y,   x+w,y+h,rv[1]);
+  ctx.lineTo(x+w,y+h-rv[2]); ctx.arcTo(x+w,y+h, x,  y+h,rv[2]);
+  ctx.lineTo(x+rv[3],y+h);   ctx.arcTo(x,  y+h, x,  y,  rv[3]);
+  ctx.lineTo(x,y+rv[0]);     ctx.arcTo(x,  y,   x+w,y,  rv[0]);
+  ctx.closePath();
+  if(fill)  {
+    ctx.fillStyle=fill;
+    ctx.fill();
+  }
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════════════════════════════════════════
+function updateUI(m){
+  const mainVal=Math.floor(m/cfg.mainStep)*cfg.mainStep;
+  const dec=m-mainVal;
+  const coin=Math.round(dec/cfg.LC);
+  
+  document.getElementById('sliderLabel').textContent=cfg.fmtVal(m);
+  
+  if(!practiceMode){
+    document.getElementById('sv1').textContent=cfg.fmtStep(mainVal);
+    
+    let lcStr;
+    if (cfg.id === 'in128') {
+      lcStr = '1/128"';
+    } else if (cfg.id === 'in001') {
+      lcStr = '0.001"';
+    } else {
+      lcStr = cfg.LC.toFixed(2);
+    }
+    
+    document.getElementById('sv2').innerHTML=coin+' × '+lcStr+'<br>= '+cfg.fmtStep(coin*cfg.LC);
+    document.getElementById('sv3').textContent=cfg.fmtVal(m);
+  }
+  
+  // Update howto instructions text
+  const lc=cfg.id.startsWith('in')?(cfg.LC/25.4).toFixed(4):cfg.LC.toFixed(2);
+  const steps=cfg.howto(coin,lc);
+  document.getElementById('howtoList').innerHTML=steps.map(s=>`<li>${s}</li>`).join('');
+}
+
+function setMeasure(v){
+  measure=snapTo(clamp(v,0,cfg.maxMm));
+  slider.value=measure;
+  draw(measure);
+  updateUI(measure);
+}
+
+function adjustMeasure(direction) {
+  if (practiceMode) return;
+  setMeasure(measure + direction * cfg.LC);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// OPTION TOGGLES
+// ═══════════════════════════════════════════════════════════════════
+function setZoom(on) {
+  showZoom = on;
+  const btnOn = document.getElementById('btn-zoom-on');
+  const btnOff = document.getElementById('btn-zoom-off');
+  if (btnOn && btnOff) {
+    if (showZoom) {
+      btnOn.classList.add('active');
+      btnOff.classList.remove('active');
+    } else {
+      btnOn.classList.remove('active');
+      btnOff.classList.add('active');
+    }
+  }
+  draw(measure);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// OBJECT SELECTION
+// ═══════════════════════════════════════════════════════════════════
+function selectObject(val) {
+  currentObject = val;
+  // Automatically size caliper to match object default dimensions when selected
+  if (val !== 'none' && !practiceMode) {
+    let size = 25.35;
+    if (val === 'bolt') size = 28.50;
+    else if (val === 'bearing') size = 32.20;
+    else if (val === 'nut') size = 36.15;
+    else if (val === 'pipe') size = 42.40;
+    else if (val === 'weld_width') size = 12.40;
+    else if (val === 'weld_length') size = 55.30;
+    else if (val === 'weld_height') size = 4.20;
+    setMeasure(size);
+  } else {
+    draw(measure);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MODE SWITCHING
+// ═══════════════════════════════════════════════════════════════════
+function setMode(id){
+  cfg=MODES[id];
+  // update buttons state
+  Object.keys(MODES).forEach(k=>{
+    const b=document.getElementById('btn-'+k);
+    if(b) b.classList.toggle('active',k===id);
+  });
+  document.getElementById('modeInfo').textContent=cfg.info;
+  
+  // configure slider limits
+  slider.min=0; slider.max=cfg.maxMm; slider.step=cfg.LC;
+  
+  // Configure input placeholder
+  document.getElementById('answer').placeholder = cfg.id === 'in128'
+    ? 'กรอกเศษส่วน เช่น 29/128 หรือ 1 5/128'
+    : (cfg.id.startsWith('in') ? 'กรอกค่านิ้ว เช่น 1.256' : 'กรอกค่ามิลลิเมตร เช่น 25.35');
+  
+  // Reset quiz/practice panels
+  practiceMode = false;
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('answer').value = '';
+  
+  // Snap measurements to scale limits
+  measure=snapTo(clamp(measure,0,cfg.maxMm));
+  draw(measure);
+  updateUI(measure);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONTROLS AND INTERACTIVITY
+// ═══════════════════════════════════════════════════════════════════
+slider.addEventListener('input',function(){
+  if(practiceMode)return;
+  setMeasure(parseFloat(this.value));
+});
+
+let dragging=false,lastPX=0;
+cv.addEventListener('mousedown', e=>{dragging=true;lastPX=e.clientX;});
+cv.addEventListener('mousemove', e=>{
+  if(!dragging||practiceMode)return;
+  const dx=e.clientX-lastPX;lastPX=e.clientX;
+  setMeasure(measure+dx/cfg.pxMm);
+});
+window.addEventListener('mouseup',   ()=>{dragging=false;});
+cv.addEventListener('mouseleave',()=>{dragging=false;});
+
+// Mobile Touch Interactivity
+cv.addEventListener('touchstart',e=>{
+  dragging=true;
+  lastPX=e.touches[0].clientX;
+  e.preventDefault();
+},{passive:false});
+cv.addEventListener('touchmove', e=>{
+  if(!dragging||practiceMode)return;
+  const dx=e.touches[0].clientX-lastPX;lastPX=e.touches[0].clientX;
+  setMeasure(measure+dx/cfg.pxMm);
+  e.preventDefault();
+},{passive:false});
+cv.addEventListener('touchend',()=>{dragging=false;});
+
+// ═══════════════════════════════════════════════════════════════════
+// PRACTICE / TEST MODE
+// ═══════════════════════════════════════════════════════════════════
+function newQ(){
+  // Random dimensions within 10mm to 100mm
+  const steps=Math.floor(Math.random()*(cfg.maxMm*0.8/cfg.LC))+Math.ceil(8/cfg.LC);
+  practiceVal=snapTo(steps*cfg.LC);
+  practiceMode=true;
+  measure=practiceVal;
+  slider.value=practiceVal;
+  
+  // Redraw canvas with hidden answers
+  draw(measure);
+  
+  document.getElementById('sv1').textContent='??';
+  document.getElementById('sv2').innerHTML='?? × ??<br>= ??';
+  document.getElementById('sv3').textContent='??';
+  document.getElementById('sliderLabel').textContent='??';
+  document.getElementById('answer').value='';
+  document.getElementById('feedback').innerHTML='';
+  
+  // Set quiz background context to measured object randomly
+  const objects = ['bolt', 'bearing', 'nut', 'pipe'];
+  const randObj = objects[Math.floor(Math.random() * objects.length)];
+  document.getElementById('objectSelect').value = randObj;
+  currentObject = randObj;
+  draw(measure);
+}
+
+function parseFractionOrDecimal(str) {
+  str = str.trim();
+  if (!str) return NaN;
+  
+  // Replace multiple dashes/spaces with a single space
+  str = str.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ');
+  
+  // Check if there is a fraction slash
+  if (str.includes('/')) {
+    const parts = str.split(' ');
+    if (parts.length === 2) {
+      // Whole number + Fraction (e.g. "1 5/128" or "1 3/16")
+      const whole = parseFloat(parts[0]);
+      const fracParts = parts[1].split('/');
+      if (fracParts.length === 2) {
+        const num = parseFloat(fracParts[0]);
+        const den = parseFloat(fracParts[1]);
+        if (!isNaN(whole) && !isNaN(num) && !isNaN(den) && den !== 0) {
+          return whole + (num / den);
+        }
+      }
+    } else if (parts.length === 1) {
+      // Pure Fraction (e.g. "29/128" or "3/16")
+      const fracParts = parts[0].split('/');
+      if (fracParts.length === 2) {
+        const num = parseFloat(fracParts[0]);
+        const den = parseFloat(fracParts[1]);
+        if (!isNaN(num) && !isNaN(den) && den !== 0) {
+          return num / den;
+        }
+      }
+    }
+    return NaN;
+  }
+  
+  // Otherwise parse as standard decimal float
+  return parseFloat(str);
+}
+
+function checkAns(){
+  if(!practiceMode){
+    document.getElementById('feedback').innerHTML='<span style="color:var(--warning)">คลิกปุ่ม "🎲 สุ่มโจทย์ใหม่" ก่อนเริ่มทำการทดสอบนะครับ 🙂</span>';
+    return;
+  }
+  const raw = parseFractionOrDecimal(document.getElementById('answer').value);
+  if(isNaN(raw)){
+    document.getElementById('feedback').innerHTML='<span style="color:var(--warning)">กรุณากรอกตัวเลขเศษส่วนหรือทศนิยมคำตอบให้ถูกต้อง เช่น 29/128 หรือ 1 5/128</span>';
+    return;
+  }
+  
+  // Convert fractions or standard to check tolerance
+  const answerMm = cfg.id.startsWith('in')?raw*25.4:raw;
+  const margin = cfg.LC * 0.49; // allow exact match with tolerance
+
+  totalAttempts += 1;
+  document.getElementById('attemptBoard').textContent = `ทำแล้ว: ${totalAttempts} ข้อ`;
+
+  if(Math.abs(answerMm-practiceVal) < margin){
+    score += 10;
+    streak += 1;
+
+    // Play confetti and feedback
+    spawnConfetti();
+    draw(measure);
+
+    document.getElementById('feedback').innerHTML=
+      `<span style="color:var(--success)">✅ ยอดเยี่ยม! คำตอบของคุณถูกต้อง (${cfg.fmtVal(practiceVal)}) รับ +10 คะแนน!</span>`;
+
+    document.getElementById('scoreBoard').textContent = `คะแนนสะสม: ${score}`;
+
+    const streakEl = document.getElementById('streakBoard');
+    streakEl.textContent = `🔥 ${streak} COMBO!`;
+    streakEl.style.display = streak > 1 ? 'block' : 'none';
+
+    practiceMode=false;
+    updateUI(practiceVal);
+    document.getElementById('sliderLabel').textContent=cfg.fmtVal(practiceVal);
+  } else {
+    streak = 0;
+    document.getElementById('streakBoard').style.display = 'none';
+    document.getElementById('feedback').innerHTML=
+      `<span style="color:var(--danger)">❌ คำตอบยังไม่ถูกครับ — ลองสังเกตขีดสเกลเลื่อนด้านล่างเพื่อเช็กเส้นเวอร์เนียร์ให้ตรงแนบสนิทที่สุดอีกรอบนะครับ</span>`;
+  }
+}
+
+function resetScore() {
+  score = 0; streak = 0; totalAttempts = 0;
+  practiceMode = false;
+  document.getElementById('scoreBoard').textContent = 'คะแนนสะสม: 0';
+  document.getElementById('attemptBoard').textContent = 'ทำแล้ว: 0 ข้อ';
+  document.getElementById('streakBoard').style.display = 'none';
+  document.getElementById('feedback').innerHTML = '<span style="color:var(--warning)">🔄 รีเซ็ตคะแนนแล้ว — พร้อมเริ่มใหม่!</span>';
+  document.getElementById('answer').value = '';
+}
+
+document.getElementById('answer').addEventListener('keydown',e=>{if(e.key==='Enter')checkAns();});
+
+// Keyboard Nudging Controls (ArrowRight/ArrowUp to increase, ArrowLeft/ArrowDown to decrease by 1 Least Count)
+window.addEventListener('keydown', function(e) {
+  // If the user is typing inside the answer text input, ignore nudge controls
+  if (document.activeElement === document.getElementById('answer')) {
+    return;
+  }
+  
+  if (practiceMode) return;
+  
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+    setMeasure(measure + cfg.LC);
+    e.preventDefault();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+    setMeasure(measure - cfg.LC);
+    e.preventDefault();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════
+setMode('mm05');
+setMeasure(25.35);
+</script>
+</body>
+</html>
