@@ -1165,57 +1165,61 @@ function drawScales(m, W, H) {
     ctx.strokeStyle = '#1a5276'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(thimbleEdgeX + thBevelW, TOP + 1); ctx.lineTo(thimbleEdgeX + thBevelW, BOT - 1); ctx.stroke();
     
-    // ── D. 3D CYLINDRICAL PROJECTION FOR ROTATING TICKS ────────────────
-    // We map thimble divisions (50 divisions for metric, 25 divisions for imperial)
-    // to a 3D cylindrical vertical coordinate using sin/cos trigonometry.
-    const thDivs = isInch ? 25 : 50;
-    const thValue = (m / cfg.pitch) * thDivs; // current float thimble divisions
-    
+    // ── D. FLAT 2D THIMBLE TICKS (ตรงกับ datum line พอดี) ──────────────
+    const thDivs    = isInch ? 25 : 50;
+    const thValMod  = ((m / cfg.pitch) * thDivs) % thDivs; // 0 .. thDivs
+    const divSpacing = isInch ? 6 : 7; // px per division — flat & evenly spaced
+
     ctx.save();
     ctx.beginPath();
     ctx.rect(thimbleEdgeX, TOP + 2, thZoomW - 2, scaleH - 4);
-    ctx.clip(); // clip within cylinder boundaries
-    
-    const cylRadiusY = scaleH * 0.49; // 3D cylinder projection radius
-    
+    ctx.clip();
+
     for (let d = 0; d < thDivs; d++) {
-      // Calculate angle of this tick on the cylinder circumference.
-      // datumLine (y = datumY) represents angle theta = 0.
-      // Standard rotation direction: numbers increase downwards
-      const theta = (d - thValue) * (2 * Math.PI / thDivs);
-      
-      // Project 3D coordinate onto 2D vertical axis
-      const cosT = Math.cos(theta);
-      if (cosT <= 0) continue; // Tick is on the back side of the cylinder (invisible)
-      
-      const ty = datumY + cylRadiusY * Math.sin(theta);
-      
+      let delta = d - thValMod;
+      if (delta >  thDivs / 2) delta -= thDivs;
+      if (delta < -thDivs / 2) delta += thDivs;
+
+      const ty = datumY + delta * divSpacing;
+      if (ty < TOP + 3 || ty > BOT - 3) continue;
+
       const isMajor = (d % 5 === 0);
-      ctx.strokeStyle = isMajor ? '#000' : '#222';
-      ctx.lineWidth = isMajor ? 1.8 : 0.9;
-      
-      // Bevel ticks: follow angled surface on bevel
-      ctx.beginPath();
-      ctx.moveTo(thimbleEdgeX, ty);
-      ctx.lineTo(thimbleEdgeX + thBevelW, ty);
-      ctx.stroke();
-      
-      // Horizontal straight ticks on main thimble body
-      ctx.beginPath();
-      ctx.moveTo(thimbleEdgeX + thBevelW, ty);
-      ctx.lineTo(thimbleEdgeX + thBevelW + 16, ty);
-      ctx.stroke();
-      
-      // Print division numbers for major ticks (0, 5, 10, 15...)
+      ctx.strokeStyle = isMajor ? '#0a0a0a' : '#2a2a2a';
+      ctx.lineWidth   = isMajor ? 1.8 : 0.9;
+
+      const tx0 = thimbleEdgeX + thBevelW;
+      // Bevel ticks (short, follows the slanted face)
+      ctx.beginPath(); ctx.moveTo(thimbleEdgeX, ty); ctx.lineTo(tx0, ty); ctx.stroke();
+      // Main body ticks
+      ctx.beginPath(); ctx.moveTo(tx0, ty); ctx.lineTo(tx0 + (isMajor ? 22 : 13), ty); ctx.stroke();
+
       if (isMajor) {
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = '#0a0a0a';
         ctx.font = 'bold 13px Inter';
         ctx.textAlign = 'left';
-        ctx.fillText(String(d), thimbleEdgeX + thBevelW + 20, ty + 4.5);
+        ctx.fillText(String(d), tx0 + 26, ty + 4.5);
       }
     }
-    
-    ctx.restore(); // end thimble cylinder clip
+
+    ctx.restore(); // end thimble clip
+
+    // ── Datum alignment line bridging sleeve → thimble (drawn on top) ──
+    // Solid line across bevel (connects sleeve datum to thimble reading line)
+    ctx.strokeStyle = '#0e1620';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(thimbleEdgeX - 2, datumY);
+    ctx.lineTo(thimbleEdgeX + thBevelW, datumY);
+    ctx.stroke();
+    // Dashed reference line on thimble body (shows exactly where to read)
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(thimbleEdgeX + thBevelW, datumY);
+    ctx.lineTo(thimbleEdgeX + thBevelW + 60, datumY);
+    ctx.stroke();
+    ctx.setLineDash([]);
     
     // Central Pointer alignment marker (Neon Magenta horizontal guide line)
     if (!shouldHideHints()) {
