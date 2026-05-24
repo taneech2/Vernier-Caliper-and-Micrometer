@@ -975,13 +975,7 @@ function drawScales(m, W, H) {
   // Draw Sleeve zoomed background block
   rr(ctx, 20, TOP, W - 40, scaleH, 10, scGrad, '#212f3d');
   
-  // Draw Central Datum Line (แกนหลักกลาง)
-  ctx.strokeStyle = '#0e1620';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.moveTo(30, datumY);
-  ctx.lineTo(W - 250, datumY);
-  ctx.stroke();
+  // Datum line drawn LAST (see bottom of function)
 
   // Spindle pitch mechanical conversion
   // Pitch is 0.5mm (metric) or 0.025" (imperial)
@@ -1203,23 +1197,6 @@ function drawScales(m, W, H) {
 
     ctx.restore(); // end thimble clip
 
-    // ── Datum alignment line bridging sleeve → thimble (drawn on top) ──
-    // Solid line across bevel (connects sleeve datum to thimble reading line)
-    ctx.strokeStyle = '#0e1620';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(thimbleEdgeX - 2, datumY);
-    ctx.lineTo(thimbleEdgeX + thBevelW, datumY);
-    ctx.stroke();
-    // Dashed reference line on thimble body (shows exactly where to read)
-    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    ctx.moveTo(thimbleEdgeX + thBevelW, datumY);
-    ctx.lineTo(thimbleEdgeX + thBevelW + 60, datumY);
-    ctx.stroke();
-    ctx.setLineDash([]);
     
     // Central Pointer alignment marker (Neon Magenta horizontal guide line)
     if (!shouldHideHints()) {
@@ -1242,6 +1219,22 @@ function drawScales(m, W, H) {
     ctx.restore();
   }
   
+  // ── Datum Line (drawn LAST — spans full sleeve + thimble, always on top) ──
+  // Sleeve side: dark, bold
+  ctx.strokeStyle = '#0e1620';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(30, datumY);
+  ctx.lineTo(thimbleEdgeX, datumY);
+  ctx.stroke();
+  // Thimble side: same line continues, slightly lighter so ticks remain readable
+  ctx.strokeStyle = 'rgba(10,10,10,0.55)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(thimbleEdgeX, datumY);
+  ctx.lineTo(W - 30, datumY);
+  ctx.stroke();
+
   // Final outer border box
   ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 2;
   rr(ctx, 20, TOP, W - 40, scaleH, 10, null, '#1565c0');
