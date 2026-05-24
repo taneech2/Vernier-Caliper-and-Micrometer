@@ -258,6 +258,17 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
 }
 .btn-tts.on{ background:rgba(57,255,20,0.07); border-color:rgba(57,255,20,0.25); color:var(--success); }
 
+/* ── Difficulty Buttons ── */
+.diff-btn {
+  padding:6px 16px; border-radius:10px; cursor:pointer; font-family:inherit;
+  font-size:0.82rem; font-weight:700; border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.03); color:#546e7a; transition:all 0.2s;
+}
+.diff-btn:hover{ background:rgba(255,255,255,0.07); }
+.diff-btn.active-easy  { background:rgba(57,255,20,0.1);  border-color:rgba(57,255,20,0.35);  color:#39ff14; }
+.diff-btn.active-medium{ background:rgba(255,183,77,0.1); border-color:rgba(255,183,77,0.35); color:#ffb74d; }
+.diff-btn.active-hard  { background:rgba(255,0,127,0.1);  border-color:rgba(255,0,127,0.35);  color:#ff007f; }
+
 /* ── Countdown Timer Ring ── */
 .timer-ring {
   position:relative; width:58px; height:58px;
@@ -410,7 +421,13 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
         </div>
       </div>
     </div>
-    <p style="color:#90a4ae; font-size:0.85rem;">คลิกที่ปุ่ม "🎲 สุ่มโจทย์ใหม่" เพื่อจำลองขนาดวัตถุแบบสุ่ม จากนั้นอ่านค่าสเกลและกรอกคำตอบเพื่อตรวจคะแนน</p>
+    <div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;">
+      <span style="font-size:0.8rem;color:#546e7a;font-weight:700;">ระดับความยาก:</span>
+      <button class="diff-btn active-easy" id="diff-easy"   onclick="setDifficulty('easy')">🟢 ง่าย · 40 วิ</button>
+      <button class="diff-btn"             id="diff-medium" onclick="setDifficulty('medium')">🟡 กลาง · 30 วิ</button>
+      <button class="diff-btn"             id="diff-hard"   onclick="setDifficulty('hard')">🔴 ยาก · 20 วิ</button>
+    </div>
+    <p style="color:#90a4ae; font-size:0.82rem;" id="diffDesc">🟢 ง่าย — แสดง hint ทุกอย่าง เหมาะสำหรับผู้เริ่มต้น</p>
     <div class="input-row">
       <input type="text" id="answer" placeholder="พิมพ์คำตอบของคุณ">
       <button class="btn btn-check" onclick="checkAns()">✓ ตรวจสอบคำตอบ</button>
@@ -1260,9 +1277,9 @@ function drawScales(m,W,H){
   const coin = Math.round(dec/cfg.LC);
   const vdiv = (cfg.vernN-1)/cfg.vernN*cfg.mainStep*PX; // px per vernier div
 
-  // Coinciding red glow line
+  // Coinciding red glow line (hidden in medium/hard quiz mode)
   let coincidingX = v0x + coin * vdiv;
-  if(coin>0 && coin <= cfg.vernN){
+  if(!shouldHideHints() && coin>0 && coin <= cfg.vernN){
     ctx.fillStyle='rgba(255, 0, 127, 0.08)'; ctx.fillRect(coincidingX-9, TOP, 18, BOT-TOP);
     ctx.strokeStyle='rgba(255, 0, 127, 0.6)'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
     ctx.beginPath(); ctx.moveTo(coincidingX, TOP); ctx.lineTo(coincidingX, BOT); ctx.stroke();
@@ -1368,8 +1385,8 @@ function drawScales(m,W,H){
       ctx.fillText(label, x, BOT-4);
     }
     
-    // Glowing red triangle overlay for the coinciding line
-    if(isCoin&&d>0&&d<cfg.vernN){
+    // Glowing red triangle overlay (hidden in medium/hard quiz mode)
+    if(!shouldHideHints() && isCoin&&d>0&&d<cfg.vernN){
       ctx.fillStyle='#ff007f'; ctx.beginPath();
       ctx.moveTo(x,VY+3); ctx.lineTo(x-6,VY-9); ctx.lineTo(x+6,VY-9);
       ctx.closePath(); ctx.fill();
@@ -1384,14 +1401,15 @@ function drawScales(m,W,H){
   ctx.fillStyle='#e65100'; ctx.font='bold 11px Sarabun'; ctx.textAlign='left';
   ctx.fillText('▲ มาตราส่วนหลัก (Main Scale)', 28, VY-8);
   ctx.fillStyle='#0d47a1'; ctx.font='bold 11px Sarabun';
-  ctx.fillText('▼ เวอร์เนียร์สเกล  ← ขีดที่ '+coin+' ตรงแนวกันสนิทที่สุด', 28, VY+16);
+  const coinLabel = shouldHideHints() ? '??' : coin;
+  ctx.fillText('▼ เวอร์เนียร์สเกล  ← ขีดที่ '+coinLabel+' ตรงแนวกันสนิทที่สุด', 28, VY+16);
 
   // Box border
   ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=2;
   rr(ctx,20,TOP,W-40,BOT-TOP,6,null,'#1565c0');
 
-  // ── 5. FLOATING DYNAMIC ZOOM LENS (Only if showZoom is true) ─────
-  if (showZoom && coin >= 0 && coin <= cfg.vernN) {
+  // ── 5. FLOATING DYNAMIC ZOOM LENS (disabled in hard quiz mode) ───
+  if (showZoom && !shouldHideZoom() && coin >= 0 && coin <= cfg.vernN) {
     try {
       drawZoomLens(coincidingX, VY, m, v0x, vdiv, W, mmToX);
     } catch (e) {
@@ -1561,8 +1579,8 @@ function drawZoomLens(ax, cy, m, v0x, vdiv, W, mmToX) {
       ctx.fillText(label, zoomVX, lensY + lensRadius * 0.85);
     }
     
-    // Zoomed red coincide arrow
-    if(isCoin && d > 0 && d < cfg.vernN){
+    // Zoomed red coincide arrow (hidden in medium/hard quiz mode)
+    if(!shouldHideHints() && isCoin && d > 0 && d < cfg.vernN){
       ctx.fillStyle = '#ff007f'; ctx.beginPath();
       ctx.moveTo(zoomVX, lensY + 5);
       ctx.lineTo(zoomVX - 8, lensY - 8);
@@ -1795,9 +1813,7 @@ cv.addEventListener('touchend',()=>{dragging=false;});
 // PRACTICE / TEST MODE
 // ═══════════════════════════════════════════════════════════════════
 function newQ(){
-  // Random dimensions within 10mm to 100mm
-  const steps=Math.floor(Math.random()*(cfg.maxMm*0.8/cfg.LC))+Math.ceil(8/cfg.LC);
-  practiceVal=snapTo(steps*cfg.LC);
+  practiceVal=pickPracticeVal();
   practiceMode=true;
   measure=practiceVal;
   slider.value=practiceVal;
@@ -1925,6 +1941,52 @@ function resetScore() {
 document.getElementById('answer').addEventListener('keydown',e=>{if(e.key==='Enter')checkAns();});
 
 // ═══════════════════════════════════════════════════════════════════
+// DIFFICULTY SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+let difficulty = 'easy';
+
+const DIFF_CONFIG = {
+  easy:   { sec:40, label:'🟢 ง่าย — แสดง hint ทุกอย่าง เหมาะสำหรับผู้เริ่มต้น' },
+  medium: { sec:30, label:'🟡 กลาง — ซ่อนตัวชี้ ต้องหาขีดที่ตรงเอง' },
+  hard:   { sec:20, label:'🔴 ยาก — ซ่อนทุก hint, ปิด Zoom, โจทย์อ่านยาก เหมือนของจริง' }
+};
+
+function setDifficulty(level) {
+  difficulty = level;
+  ['easy','medium','hard'].forEach(l => {
+    const btn = document.getElementById('diff-'+l);
+    if (btn) btn.className = 'diff-btn' + (l===level ? ' active-'+l : '');
+  });
+  const desc = document.getElementById('diffDesc');
+  if (desc) desc.textContent = DIFF_CONFIG[level].label;
+  if (practiceMode) { stopTimer(); startTimer(); }
+}
+
+function getTimerSec() { return DIFF_CONFIG[difficulty].sec; }
+
+function shouldHideHints() { return practiceMode && difficulty !== 'easy'; }
+function shouldHideZoom()  { return practiceMode && difficulty === 'hard'; }
+
+function pickPracticeVal() {
+  const rangeMin = 8;
+  const rangeMax = cfg.maxMm * 0.85;
+  if (difficulty === 'hard') {
+    // Pick values where coin lands at ambiguous positions (not labeled ticks)
+    const labeled = new Set([0, cfg.vernN]);
+    for (let i = 1; i <= 4; i++) labeled.add(Math.round(cfg.vernN * i / 4));
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const steps = Math.floor(Math.random() * ((rangeMax-rangeMin)/cfg.LC)) + Math.ceil(rangeMin/cfg.LC);
+      const val = snapTo(steps * cfg.LC);
+      const mainV = Math.floor(val/cfg.mainStep)*cfg.mainStep;
+      const coin  = Math.round((val-mainV)/cfg.LC);
+      if (!labeled.has(coin) && coin > 1 && coin < cfg.vernN-1) return val;
+    }
+  }
+  const steps = Math.floor(Math.random()*(rangeMax/cfg.LC)) + Math.ceil(rangeMin/cfg.LC);
+  return snapTo(clamp(steps*cfg.LC, rangeMin, rangeMax));
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // TTS — TEXT TO SPEECH
 // ═══════════════════════════════════════════════════════════════════
 let ttsEnabled = true;
@@ -2040,14 +2102,15 @@ function stopDemo() {
 // ═══════════════════════════════════════════════════════════════════
 // COUNTDOWN TIMER
 // ═══════════════════════════════════════════════════════════════════
-const TIMER_SEC = 30;
-const CIRCUMFERENCE = 2 * Math.PI * 26; // ≈ 163.4
+const CIRCUMFERENCE = 2 * Math.PI * 26;
 let timerInterval = null;
 let timerRemaining = 0;
+let timerMax = 30;
 
 function startTimer() {
   stopTimer();
-  timerRemaining = TIMER_SEC;
+  timerMax = getTimerSec();
+  timerRemaining = timerMax;
   document.getElementById('timerRing').classList.add('active');
   updateTimerDisplay();
   timerInterval = setInterval(() => {
@@ -2063,7 +2126,7 @@ function updateTimerDisplay() {
   const circle = document.getElementById('timerCircle');
   const text   = document.getElementById('timerText');
   if (!circle || !text) return;
-  const ratio  = timerRemaining / TIMER_SEC;
+  const ratio  = timerRemaining / timerMax;
   circle.style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
   const color = timerRemaining > 15 ? '#39ff14' : timerRemaining > 8 ? '#ffb74d' : '#ff007f';
   circle.style.stroke = color;
