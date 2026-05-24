@@ -257,6 +257,30 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
   font-family:inherit; font-size:0.82rem; font-weight:600; transition:all 0.2s;
 }
 .btn-tts.on{ background:rgba(57,255,20,0.07); border-color:rgba(57,255,20,0.25); color:var(--success); }
+
+/* ── Countdown Timer Ring ── */
+.timer-ring {
+  position:relative; width:58px; height:58px;
+  display:none; flex-shrink:0;
+}
+.timer-ring.active { display:block; }
+.timer-track { fill:none; stroke:rgba(255,255,255,0.08); stroke-width:5; }
+.timer-progress {
+  fill:none; stroke:#39ff14; stroke-width:5;
+  stroke-dasharray:163.4; stroke-dashoffset:0;
+  transform:rotate(-90deg); transform-origin:30px 30px;
+  transition:stroke-dashoffset 0.9s linear, stroke 0.4s;
+}
+.timer-text {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-size:1.15rem; font-weight:800; color:#39ff14; transition:color 0.4s;
+  font-family:'Inter',sans-serif;
+}
+@keyframes timer-pulse {
+  0%,100%{ transform:translate(-50%,-50%) scale(1); }
+  50%{ transform:translate(-50%,-50%) scale(1.18); }
+}
+.timer-text.urgent { animation:timer-pulse 0.6s ease-in-out infinite; }
 </style>
 </head>
 <body>
@@ -377,6 +401,13 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
         <div class="score-badge" id="scoreBoard">คะแนนสะสม: 0</div>
         <div class="score-badge" id="attemptBoard" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#90a4ae;">ทำแล้ว: 0 ข้อ</div>
         <div class="streak-badge" id="streakBoard">🔥 0 COMBO!</div>
+        <div class="timer-ring" id="timerRing">
+          <svg viewBox="0 0 60 60" width="58" height="58">
+            <circle class="timer-track" cx="30" cy="30" r="26"/>
+            <circle class="timer-progress" id="timerCircle" cx="30" cy="30" r="26"/>
+          </svg>
+          <span class="timer-text" id="timerText">30</span>
+        </div>
       </div>
     </div>
     <p style="color:#90a4ae; font-size:0.85rem;">คลิกที่ปุ่ม "🎲 สุ่มโจทย์ใหม่" เพื่อจำลองขนาดวัตถุแบบสุ่ม จากนั้นอ่านค่าสเกลและกรอกคำตอบเพื่อตรวจคะแนน</p>
@@ -1787,6 +1818,7 @@ function newQ(){
   currentObject = randObj;
   draw(measure);
   speak('อ่านค่าจากเวอร์เนียร์คาลิเปอร์ แล้วกรอกคำตอบ');
+  startTimer();
 }
 
 function parseFractionOrDecimal(str) {
@@ -1866,6 +1898,7 @@ function checkAns(){
     updateUI(practiceVal);
     document.getElementById('sliderLabel').textContent=cfg.fmtVal(practiceVal);
 
+    stopTimer();
     speak('ถูกต้อง! ค่าที่อ่านได้คือ ' + valText.replace(' มม.',' มิลลิเมตร').replace('"',' นิ้ว'));
     updateMastery(true);
   } else {
@@ -2002,6 +2035,64 @@ function stopDemo() {
   if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
   const btn = document.getElementById('demoBtn');
   if (btn) { btn.textContent = '🎬 ดูสาธิต'; btn.classList.remove('running'); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COUNTDOWN TIMER
+// ═══════════════════════════════════════════════════════════════════
+const TIMER_SEC = 30;
+const CIRCUMFERENCE = 2 * Math.PI * 26; // ≈ 163.4
+let timerInterval = null;
+let timerRemaining = 0;
+
+function startTimer() {
+  stopTimer();
+  timerRemaining = TIMER_SEC;
+  document.getElementById('timerRing').classList.add('active');
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    updateTimerDisplay();
+    if (timerRemaining === 10) speak('เหลือเวลาสิบวินาที');
+    if (timerRemaining === 5)  speak('ห้า สี่ สาม สอง หนึ่ง');
+    if (timerRemaining <= 0)  { stopTimer(); onTimerExpired(); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const circle = document.getElementById('timerCircle');
+  const text   = document.getElementById('timerText');
+  if (!circle || !text) return;
+  const ratio  = timerRemaining / TIMER_SEC;
+  circle.style.strokeDashoffset = CIRCUMFERENCE * (1 - ratio);
+  const color = timerRemaining > 15 ? '#39ff14' : timerRemaining > 8 ? '#ffb74d' : '#ff007f';
+  circle.style.stroke = color;
+  text.style.color    = color;
+  text.textContent    = timerRemaining;
+  if (timerRemaining <= 8) text.classList.add('urgent');
+  else text.classList.remove('urgent');
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  const ring = document.getElementById('timerRing');
+  if (ring) ring.classList.remove('active');
+  const text = document.getElementById('timerText');
+  if (text) text.classList.remove('urgent');
+}
+
+function onTimerExpired() {
+  if (!practiceMode) return;
+  practiceMode = false;
+  streak = 0;
+  document.getElementById('streakBoard').style.display = 'none';
+  const valText = cfg.fmtVal(practiceVal);
+  document.getElementById('feedback').innerHTML =
+    `<span style="color:var(--danger)">⏰ หมดเวลา! คำตอบที่ถูกต้องคือ <strong style="color:var(--warning)">${valText}</strong></span>`;
+  speak('หมดเวลา! คำตอบที่ถูกต้องคือ ' + valText.replace(' มม.',' มิลลิเมตร').replace('"',' นิ้ว'));
+  updateMastery(false);
+  updateUI(practiceVal);
+  document.getElementById('sliderLabel').textContent = valText;
 }
 
 // Keyboard Nudging Controls (ArrowRight/ArrowUp to increase, ArrowLeft/ArrowDown to decrease by 1 Least Count)
