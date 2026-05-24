@@ -1496,17 +1496,20 @@ function checkAns(){
   totalAttempts += 1;
   document.getElementById('attemptBoard').textContent = `ทำแล้ว: ${totalAttempts} ข้อ`;
   if(Math.abs(raw - practiceVal) < margin){
-    const pts = { easy:10, medium:20, hard:30 }[difficulty] || 10;
+    const diffMult  = { easy:1, medium:2, hard:3 }[difficulty] || 1;
+    const inchMult  = cfg.id.startsWith('in') ? 2 : 1;
+    const pts       = 10 * diffMult * inchMult;
     score += pts;
     streak += 1;
 
     spawnConfetti();
     draw(measure);
 
-    const valText = cfg.fmtVal(practiceVal);
-    const multLabel = { easy:'×1', medium:'×2', hard:'×3' }[difficulty];
+    const valText   = cfg.fmtVal(practiceVal);
+    const diffLabel = { easy:'🟢×1', medium:'🟡×2', hard:'🔴×3' }[difficulty];
+    const inchLabel = inchMult === 2 ? ' · 📐นิ้ว×2' : '';
     document.getElementById('feedback').innerHTML =
-      `<span style="color:var(--success)">✅ ยอดเยี่ยม! คำตอบถูกต้อง (${valText}) รับ <strong>+${pts} คะแนน</strong> ${multLabel}</span>`;
+      `<span style="color:var(--success)">✅ ยอดเยี่ยม! คำตอบถูกต้อง (${valText}) รับ <strong>+${pts} คะแนน</strong> ${diffLabel}${inchLabel}</span>`;
 
     document.getElementById('scoreBoard').textContent = `คะแนนสะสม: ${score}`;
     const streakEl = document.getElementById('streakBoard');
