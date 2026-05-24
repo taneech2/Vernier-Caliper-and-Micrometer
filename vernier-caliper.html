@@ -222,6 +222,41 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
   .input-row { flex-direction: column; align-items: stretch; }
   .input-row input { width: 100%; }
 }
+
+/* ── Mastery Badges ── */
+.mastery-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.mastery-badge {
+  padding:5px 14px; border-radius:20px; font-size:0.78rem; font-weight:700;
+  border:1px solid rgba(255,255,255,0.08); color:#455a64;
+  background:rgba(255,255,255,0.02); transition:all 0.5s;
+}
+.mastery-badge.achieved {
+  background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.4);
+  color:#ffd700; box-shadow:0 0 14px rgba(255,215,0,0.15);
+  animation:badge-glow 2s ease-in-out infinite;
+}
+@keyframes badge-glow {
+  0%,100%{ box-shadow:0 0 10px rgba(255,215,0,0.15); }
+  50%{ box-shadow:0 0 22px rgba(255,215,0,0.4); }
+}
+
+/* ── Demo Button ── */
+.btn-demo {
+  background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.25);
+  color:#00e5ff; padding:7px 16px; border-radius:10px; cursor:pointer;
+  font-family:inherit; font-size:0.82rem; font-weight:600;
+  transition:all 0.2s; display:inline-flex; align-items:center; gap:5px;
+}
+.btn-demo:hover{ background:rgba(0,229,255,0.18); }
+.btn-demo.running{ background:rgba(255,0,127,0.1); border-color:rgba(255,0,127,0.3); color:#ff007f; }
+
+/* ── TTS Toggle ── */
+.btn-tts {
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+  color:#78909c; padding:7px 12px; border-radius:10px; cursor:pointer;
+  font-family:inherit; font-size:0.82rem; font-weight:600; transition:all 0.2s;
+}
+.btn-tts.on{ background:rgba(57,255,20,0.07); border-color:rgba(57,255,20,0.25); color:var(--success); }
 </style>
 </head>
 <body>
@@ -333,7 +368,11 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
   <!-- Quiz/Practice Panel -->
   <div class="glass-panel practice-panel">
     <div class="practice-header">
-      <h3>🎯 แบบทดสอบฝึกอ่านค่าเวอร์เนียร์</h3>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <h3>🎯 แบบทดสอบฝึกอ่านค่าเวอร์เนียร์</h3>
+        <button class="btn-demo" id="demoBtn" onclick="startDemo()">🎬 ดูสาธิต</button>
+        <button class="btn-tts on" id="ttsBtn" onclick="toggleTTS()">🔊 เสียง</button>
+      </div>
       <div class="scoreboard">
         <div class="score-badge" id="scoreBoard">คะแนนสะสม: 0</div>
         <div class="score-badge" id="attemptBoard" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:#90a4ae;">ทำแล้ว: 0 ข้อ</div>
@@ -348,6 +387,12 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
       <button class="btn" onclick="resetScore()" style="background:rgba(255,70,70,0.12);border:1px solid rgba(255,70,70,0.3);color:#ff6b6b;">🔄 รีเซ็ต</button>
     </div>
     <div id="feedback"></div>
+    <div class="mastery-row">
+      <span class="mastery-badge" id="mb-mm05">⭐ 0.05 มม. 0/5</span>
+      <span class="mastery-badge" id="mb-mm02">⭐ 0.02 มม. 0/5</span>
+      <span class="mastery-badge" id="mb-in128">⭐ 1/128" 0/5</span>
+      <span class="mastery-badge" id="mb-in001">⭐ 0.001" 0/5</span>
+    </div>
   </div>
 
 </div>
@@ -1735,13 +1780,13 @@ function newQ(){
   document.getElementById('sliderLabel').textContent='??';
   document.getElementById('answer').value='';
   document.getElementById('feedback').innerHTML='';
-  
-  // Set quiz background context to measured object randomly
+
   const objects = ['bolt', 'bearing', 'nut', 'pipe'];
   const randObj = objects[Math.floor(Math.random() * objects.length)];
   document.getElementById('objectSelect').value = randObj;
   currentObject = randObj;
   draw(measure);
+  speak('อ่านค่าจากเวอร์เนียร์คาลิเปอร์ แล้วกรอกคำตอบ');
 }
 
 function parseFractionOrDecimal(str) {
@@ -1805,15 +1850,14 @@ function checkAns(){
     score += 10;
     streak += 1;
 
-    // Play confetti and feedback
     spawnConfetti();
     draw(measure);
 
+    const valText = cfg.fmtVal(practiceVal);
     document.getElementById('feedback').innerHTML=
-      `<span style="color:var(--success)">✅ ยอดเยี่ยม! คำตอบของคุณถูกต้อง (${cfg.fmtVal(practiceVal)}) รับ +10 คะแนน!</span>`;
+      `<span style="color:var(--success)">✅ ยอดเยี่ยม! คำตอบถูกต้อง (${valText}) รับ +10 คะแนน!</span>`;
 
     document.getElementById('scoreBoard').textContent = `คะแนนสะสม: ${score}`;
-
     const streakEl = document.getElementById('streakBoard');
     streakEl.textContent = `🔥 ${streak} COMBO!`;
     streakEl.style.display = streak > 1 ? 'block' : 'none';
@@ -1821,11 +1865,17 @@ function checkAns(){
     practiceMode=false;
     updateUI(practiceVal);
     document.getElementById('sliderLabel').textContent=cfg.fmtVal(practiceVal);
+
+    speak('ถูกต้อง! ค่าที่อ่านได้คือ ' + valText.replace(' มม.',' มิลลิเมตร').replace('"',' นิ้ว'));
+    updateMastery(true);
   } else {
     streak = 0;
     document.getElementById('streakBoard').style.display = 'none';
+    const hint = generateHint(raw);
     document.getElementById('feedback').innerHTML=
-      `<span style="color:var(--danger)">❌ คำตอบยังไม่ถูกครับ — ลองสังเกตขีดสเกลเลื่อนด้านล่างเพื่อเช็กเส้นเวอร์เนียร์ให้ตรงแนบสนิทที่สุดอีกรอบนะครับ</span>`;
+      `<span style="color:var(--danger)">❌ ยังไม่ถูกครับ</span> — ${hint}`;
+    speak('ยังไม่ถูก ลองดูคำใบ้แล้วลองใหม่อีกครั้ง');
+    updateMastery(false);
   }
 }
 
@@ -1840,6 +1890,119 @@ function resetScore() {
 }
 
 document.getElementById('answer').addEventListener('keydown',e=>{if(e.key==='Enter')checkAns();});
+
+// ═══════════════════════════════════════════════════════════════════
+// TTS — TEXT TO SPEECH
+// ═══════════════════════════════════════════════════════════════════
+let ttsEnabled = true;
+function speak(text) {
+  if (!ttsEnabled || !window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'th-TH'; u.rate = 0.88; u.pitch = 1;
+  speechSynthesis.speak(u);
+}
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  const btn = document.getElementById('ttsBtn');
+  if (ttsEnabled) { btn.textContent = '🔊 เสียง'; btn.classList.add('on'); }
+  else { btn.textContent = '🔇 ปิดเสียง'; btn.classList.remove('on'); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MASTERY TRACKING
+// ═══════════════════════════════════════════════════════════════════
+const masteryStreaks = { mm05:0, mm02:0, in128:0, in001:0 };
+const masteryDone    = { mm05:false, mm02:false, in128:false, in001:false };
+const MASTERY_N = 5;
+
+function updateMastery(correct) {
+  const id = cfg.id;
+  if (correct) {
+    masteryStreaks[id]++;
+    if (masteryStreaks[id] >= MASTERY_N && !masteryDone[id]) {
+      masteryDone[id] = true;
+      const badge = document.getElementById('mb-' + id);
+      if (badge) {
+        badge.classList.add('achieved');
+        badge.textContent = '🏆 ' + cfg.label + ' เชี่ยวชาญแล้ว!';
+      }
+      speak('ยินดีด้วย! คุณเชี่ยวชาญโหมด ' + cfg.label + ' แล้ว');
+      spawnConfetti(); draw(measure);
+    }
+  } else {
+    masteryStreaks[id] = 0;
+  }
+  const badge = document.getElementById('mb-' + id);
+  if (badge && !masteryDone[id]) {
+    badge.textContent = '⭐ ' + cfg.label + ' ' + masteryStreaks[id] + '/' + MASTERY_N;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HINT GENERATOR
+// ═══════════════════════════════════════════════════════════════════
+function generateHint(userRaw) {
+  const userMm = cfg.id.startsWith('in') ? userRaw * 25.4 : userRaw;
+  const mainVal_c = Math.floor(practiceVal / cfg.mainStep) * cfg.mainStep;
+  const coin_c    = Math.round((practiceVal - mainVal_c) / cfg.LC);
+  const mainVal_u = Math.floor(userMm / cfg.mainStep) * cfg.mainStep;
+  if (Math.abs(mainVal_u - mainVal_c) > cfg.mainStep * 0.6) {
+    return `💡 <strong>คำใบ้:</strong> สเกลหลักที่ถูกต้องคือ <strong style="color:var(--warning)">${cfg.fmtStep(mainVal_c)}</strong> — ดูขีดสเกลหลักที่อยู่ทางซ้ายของเส้น 0 สเกลเลื่อนอีกครั้ง`;
+  } else {
+    return `💡 <strong>คำใบ้:</strong> สเกลหลักถูกแล้ว! แต่ขีดเวอร์เนียร์ที่ตรงแนวกันสนิทที่สุดคือ <strong style="color:var(--success)">ขีดที่ ${coin_c}</strong> — มองเส้นสีชมพูบนสเกลด้านล่าง`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTO-DEMO
+// ═══════════════════════════════════════════════════════════════════
+let demoRunning = false;
+let demoTimer   = null;
+
+function startDemo() {
+  if (demoRunning) { stopDemo(); return; }
+  stopDemo();
+  practiceMode = false;
+  demoRunning = true;
+  const btn = document.getElementById('demoBtn');
+  if (btn) { btn.textContent = '⏹ หยุด'; btn.classList.add('running'); }
+
+  const targets = { mm05:32.75, mm02:28.34, in128:44.069, in001:36.576 };
+  const target = snapTo(targets[cfg.id] || snapTo(cfg.maxMm * 0.32));
+
+  let current = 0;
+  setMeasure(current);
+  document.getElementById('feedback').innerHTML = '<span style="color:var(--primary)">🎬 กำลังสาธิต — สังเกตขั้นตอนการอ่านค่าทีละขั้น</span>';
+  speak('เริ่มสาธิตการอ่านค่า สังเกตสเกลหลักและสเกลเวอร์เนียร์ขณะที่เลื่อน');
+
+  function step() {
+    if (!demoRunning) return;
+    current = snapTo(Math.min(current + cfg.LC * 4, target));
+    setMeasure(current);
+    if (current < target) {
+      demoTimer = setTimeout(step, 55);
+    } else {
+      demoTimer = setTimeout(() => {
+        if (!demoRunning) return;
+        const valText = cfg.fmtVal(target);
+        const speakVal = valText.replace(' มม.', ' มิลลิเมตร').replace('"', ' นิ้ว');
+        document.getElementById('feedback').innerHTML =
+          `<span style="color:var(--success)">✅ สาธิตเสร็จ — ค่าที่อ่านได้คือ <strong>${valText}</strong> · ดูขั้นตอนด้านบน แล้วกด 🎲 เพื่อฝึกเอง</span>`;
+        speak('ค่าที่อ่านได้จากเวอร์เนียร์คาลิเปอร์คือ ' + speakVal);
+        stopDemo();
+      }, 900);
+    }
+  }
+  demoTimer = setTimeout(step, 400);
+}
+
+function stopDemo() {
+  demoRunning = false;
+  if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
+  const btn = document.getElementById('demoBtn');
+  if (btn) { btn.textContent = '🎬 ดูสาธิต'; btn.classList.remove('running'); }
+}
 
 // Keyboard Nudging Controls (ArrowRight/ArrowUp to increase, ArrowLeft/ArrowDown to decrease by 1 Least Count)
 window.addEventListener('keydown', function(e) {
