@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=920, initial-scale=1.0">
 <title>ไมโครมิเตอร์อัจฉริยะ — สื่อการสอนพรีเมียม</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4fc3f7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="วัดละเอียด">
+<script>
+  let deferredPrompt=null;
+  if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+  window.addEventListener('appinstalled',()=>{const b=document.getElementById('btn-install');if(b)b.style.display='none';});
+  function installApp(){
+    if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});}
+    else{const h=document.getElementById('ios-hint');if(h){h.style.display='block';setTimeout(()=>h.style.display='none',5000);}}
+  }
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -305,6 +320,10 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
   <header>
     <h1>🔬 ไมโครมิเตอร์อัจฉริยะเสมือนจริง</h1>
     <p class="subtitle">สื่อการเรียนรู้ออนไลน์ระบบสัมผัสความละเอียดสูงสำหรับงานช่างวิชาชีพ</p>
+    <div style="text-align:center;margin:12px 0 4px;">
+      <button id="btn-install" onclick="installApp()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0288d1,#01579b);color:#fff;border:none;padding:9px 20px;border-radius:24px;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:700;box-shadow:0 4px 14px rgba(2,136,209,.4);">📲 เพิ่มลงในหน้าจอหลัก</button>
+      <div id="ios-hint" style="display:none;margin-top:8px;background:#01579b33;border:1px solid #4fc3f755;border-radius:10px;padding:10px 16px;font-size:13px;color:#b3e5fc;max-width:340px;margin-left:auto;margin-right:auto;">iOS: กด <strong>Share</strong> แล้วเลือก <strong>"Add to Home Screen"</strong> 📱</div>
+    </div>
     <div class="author-tag">
       ผู้จัดทำ: <strong>ครูธานี ชมสุข</strong> · วิทยาลัยการอาชีพบุรีรัมย์
     </div>

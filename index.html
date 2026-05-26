@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=920, initial-scale=1.0">
 <title>สื่อการสอนเครื่องมือวัด — ครูธานี ชมสุข</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4fc3f7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="วัดละเอียด">
+<script>
+  let deferredPrompt=null;
+  if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+  window.addEventListener('appinstalled',()=>{const b=document.getElementById('btn-install');if(b)b.style.display='none';});
+  function installApp(){
+    if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});}
+    else{const h=document.getElementById('ios-hint');if(h){h.style.display='block';setTimeout(()=>h.style.display='none',5000);}}
+  }
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {

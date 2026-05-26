@@ -1,0 +1,17 @@
+{
+  "name": "เวอร์เนียร์ & ไมโครมิเตอร์",
+  "short_name": "วัดละเอียด",
+  "description": "สื่อการสอนเวอร์เนียร์คาลิเปอร์และไมโครมิเตอร์ วิทยาลัยการอาชีพบุรีรัมย์",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f2027",
+  "theme_color": "#4fc3f7",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%230f2027' rx='24'/><text x='96' y='140' font-size='110' text-anchor='middle'>📏</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
