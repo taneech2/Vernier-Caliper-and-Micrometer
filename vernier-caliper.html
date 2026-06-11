@@ -1256,7 +1256,7 @@ function drawCaliperBody(m, W, slideX, fixedX, jawW, jawH, barY, barH) {
     ctx.beginPath(); ctx.moveTo(lx1+9, helperY); ctx.lineTo(lx2-9, helperY); ctx.stroke();
     
     ctx.fillStyle='#00e5ff'; ctx.font='bold 12px Inter'; ctx.textAlign='center';
-    ctx.fillText(cfg.fmtVal(m), (lx1+lx2)/2, helperY - 5);
+    ctx.fillText(practiceMode ? '??' : cfg.fmtVal(m), (lx1+lx2)/2, helperY - 5);
   }
   
   ctx.restore();
@@ -1689,8 +1689,8 @@ function updateUI(m){
   const dec=m-mainVal;
   const coin=Math.round(dec/cfg.LC);
   
-  document.getElementById('sliderLabel').textContent=cfg.fmtVal(m);
-  
+  document.getElementById('sliderLabel').textContent = practiceMode ? '??' : cfg.fmtVal(m);
+
   if(!practiceMode){
     document.getElementById('sv1').textContent=cfg.fmtStep(mainVal);
     

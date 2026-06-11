@@ -1309,8 +1309,8 @@ function updateUI(m){
     vernValue = vernIdx * (isInch ? 0.0001 : 0.001);
   }
   
-  document.getElementById('sliderLabel').textContent = cfg.fmtVal(m);
-  
+  document.getElementById('sliderLabel').textContent = practiceMode ? '??' : cfg.fmtVal(m);
+
   if(!practiceMode){
     document.getElementById('sv1').textContent = cfg.fmtStep(sleeveReading);
     
