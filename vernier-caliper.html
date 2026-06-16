@@ -505,18 +505,34 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
         <button onclick="closeReport()" style="background:none;border:none;color:#78909c;font-size:1.8rem;cursor:pointer;line-height:1;">&times;</button>
       </div>
       <div class="report-summary" id="reportSummary"></div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-check" onclick="exportCSV()" style="font-size:0.82rem;padding:7px 14px;">📥 ดาวน์โหลด CSV (เปิดใน Excel)</button>
         <button class="btn" onclick="clearExamLog()" style="background:rgba(255,70,70,0.12);border:1px solid rgba(255,70,70,0.3);color:#ff6b6b;font-size:0.82rem;padding:7px 14px;">🗑 ลบข้อมูลทั้งหมด</button>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.82rem;color:#90a4ae;">เกณฑ์ขั้นต่ำ:</span>
+          <input type="number" id="passThreshold" value="500" min="0" style="width:70px;padding:5px 8px;border-radius:8px;border:1px solid #37474f;background:#060b11;color:#fff;font-size:0.85rem;font-family:inherit;outline:none;text-align:center;" onchange="updateStudentSummary()">
+          <span style="font-size:0.78rem;color:#546e7a;">คะแนน</span>
+        </span>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto;margin-bottom:14px;">
         <table>
           <thead>
-            <tr><th>#</th><th>ชื่อ-สกุล</th><th>แผนก</th><th>โหมด</th><th>ระดับ</th><th>โจทย์</th><th>คำตอบ</th><th>ผล</th><th>คะแนน</th><th>เวลา</th></tr>
+            <tr style="background:rgba(57,255,20,0.08);"><th>ชื่อ-สกุล</th><th>แผนก</th><th>ทำ</th><th>ถูก</th><th>อัตรา</th><th>คะแนนรวม</th><th>สถานะ</th></tr>
           </thead>
-          <tbody id="reportBody"></tbody>
+          <tbody id="studentSummaryBody"></tbody>
         </table>
       </div>
+      <details style="margin-bottom:8px;">
+        <summary style="cursor:pointer;color:#78909c;font-size:0.85rem;font-weight:700;">📋 รายละเอียดทุกข้อ (คลิกเปิด)</summary>
+        <div style="overflow-x:auto;margin-top:8px;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>ชื่อ-สกุล</th><th>แผนก</th><th>โหมด</th><th>ระดับ</th><th>โจทย์</th><th>คำตอบ</th><th>ผล</th><th>คะแนน</th><th>เวลา</th></tr>
+            </thead>
+            <tbody id="reportBody"></tbody>
+          </table>
+        </div>
+      </details>
     </div>
   </div>
 
@@ -676,7 +692,33 @@ function showReport() {
     '<div class="report-stat">ถูก: <strong>'+correct+'</strong> ('+( total ? Math.round(correct/total*100) : 0 )+'%)</div>' +
     '<div class="report-stat">คะแนนรวม: <strong>'+totalPts+'</strong></div>' +
     '<div class="report-stat">จำนวนผู้สอบ: <strong>'+students.length+'</strong> คน</div>';
+  updateStudentSummary();
   document.getElementById('reportModal').style.display = 'flex';
+}
+
+function updateStudentSummary() {
+  const threshold = parseInt(document.getElementById('passThreshold').value) || 0;
+  const byStudent = {};
+  examLog.forEach(e => {
+    if (!byStudent[e.name]) byStudent[e.name] = { dept: e.dept, total: 0, correct: 0, points: 0 };
+    byStudent[e.name].total++;
+    if (e.result === true) byStudent[e.name].correct++;
+    byStudent[e.name].points += e.points;
+  });
+  const stBody = document.getElementById('studentSummaryBody');
+  stBody.innerHTML = '';
+  if (examLog.length === 0) {
+    stBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#546e7a;padding:14px;">ยังไม่มีข้อมูล</td></tr>';
+    return;
+  }
+  Object.entries(byStudent).forEach(([name, s]) => {
+    const pct = s.total ? Math.round(s.correct / s.total * 100) : 0;
+    const pass = s.points >= threshold;
+    const statusText = pass ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+    const rowBg = pass ? 'background:rgba(57,255,20,0.04)' : 'background:rgba(255,0,127,0.04)';
+    const ptsColor = pass ? 'color:#39ff14' : 'color:#ff007f';
+    stBody.innerHTML += '<tr style="'+rowBg+'"><td>'+name+'</td><td>'+s.dept+'</td><td>'+s.total+'</td><td>'+s.correct+'</td><td>'+pct+'%</td><td style="font-weight:bold;'+ptsColor+'">'+s.points+'</td><td style="font-weight:bold;'+ptsColor+'">'+statusText+'</td></tr>';
+  });
 }
 
 function closeReport() {
