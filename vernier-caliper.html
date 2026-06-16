@@ -655,6 +655,16 @@ let totalAttempts = 0;
 // Exam log (persisted in localStorage)
 let examLog = JSON.parse(localStorage.getItem('vernierExamLog') || '[]');
 
+const TEACHER_PIN = '1234';
+let teacherAuth = false;
+function checkTeacherAuth() {
+  if (teacherAuth) return true;
+  const pin = prompt('🔒 กรุณาใส่รหัสครู:');
+  if (pin === TEACHER_PIN) { teacherAuth = true; return true; }
+  if (pin !== null) alert('❌ รหัสไม่ถูกต้อง');
+  return false;
+}
+
 function logExam(result, userAnswer) {
   examLog.push({
     name: document.getElementById('studentName').value.trim() + ' ' + document.getElementById('studentSurname').value.trim(),
@@ -671,6 +681,7 @@ function logExam(result, userAnswer) {
 }
 
 function showReport() {
+  if (!checkTeacherAuth()) return;
   const tbody = document.getElementById('reportBody');
   tbody.innerHTML = '';
   if (examLog.length === 0) {
@@ -741,6 +752,7 @@ function exportCSV() {
 }
 
 function clearExamLog() {
+  if (!checkTeacherAuth()) return;
   if (!confirm('ต้องการลบข้อมูลรายงานทั้งหมดจริงหรือ?')) return;
   examLog = [];
   localStorage.removeItem('vernierExamLog');
