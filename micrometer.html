@@ -297,6 +297,34 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
 }
 .timer-text.urgent { animation:timer-pulse 0.6s ease-in-out infinite; }
 
+/* ── Report Modal ── */
+.report-modal {
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.85); z-index:200; justify-content:center; align-items:center;
+  backdrop-filter:blur(6px);
+}
+.report-content {
+  background:#0d1b2a; border:1px solid rgba(0,229,255,0.2); border-radius:16px;
+  padding:24px; max-width:95vw; max-height:85vh; overflow:auto; width:960px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
+}
+.report-content table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-top:12px; }
+.report-content th {
+  background:rgba(0,229,255,0.1); color:#80e8ff; padding:8px 6px;
+  text-align:left; font-size:0.78rem; border-bottom:1px solid rgba(0,229,255,0.2);
+  position:sticky; top:0;
+}
+.report-content td { padding:6px; border-bottom:1px solid rgba(255,255,255,0.04); color:#cfd8dc; }
+.report-content tr:hover td { background:rgba(255,255,255,0.03); }
+.report-summary {
+  display:flex; gap:14px; flex-wrap:wrap; margin:10px 0;
+}
+.report-stat {
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px; padding:8px 16px; font-size:0.82rem; color:#b0bec5;
+}
+.report-stat strong { color:#00e5ff; }
+
 @media(max-width:768px){
   .steps{ grid-template-columns:1fr; }
   .op{ display:none; }
@@ -430,6 +458,12 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
       </div>
     </div>
     <p style="color:#90a4ae; font-size:0.85rem;">สุ่มจำลองความกว้างวัตถุด้วยปุ่ม "🎲 สุ่มโจทย์ใหม่" จากนั้นอ่านตำแหน่งสเกลใหญ่และเกลียวปลอกหมุน แล้วตอบในช่องเพื่อสะสมคะแนน</p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 4px;padding:10px 14px;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.15);border-radius:12px;">
+      <span style="font-size:0.82rem;color:#80e8ff;font-weight:700;white-space:nowrap;">👤 ผู้สอบ:</span>
+      <input type="text" id="studentName" placeholder="ชื่อ" style="padding:8px 12px;border-radius:8px;border:1px solid #37474f;background:#060b11;color:#fff;font-size:0.88rem;font-family:inherit;width:120px;outline:none;">
+      <input type="text" id="studentSurname" placeholder="นามสกุล" style="padding:8px 12px;border-radius:8px;border:1px solid #37474f;background:#060b11;color:#fff;font-size:0.88rem;font-family:inherit;width:140px;outline:none;">
+      <input type="text" id="studentDept" placeholder="แผนก/ห้อง" style="padding:8px 12px;border-radius:8px;border:1px solid #37474f;background:#060b11;color:#fff;font-size:0.88rem;font-family:inherit;width:120px;outline:none;">
+    </div>
     <div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;">
       <span style="font-size:0.8rem;color:#546e7a;font-weight:700;">ระดับความยาก:</span>
       <button class="diff-btn active-easy" id="diff-easy"   onclick="setDifficulty('easy')">🟢 ง่าย · 40 วิ</button>
@@ -442,6 +476,7 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
       <button class="btn btn-check" onclick="checkAns()">✓ ตรวจสอบคำตอบ</button>
       <button class="btn btn-new" onclick="newQ()">🎲 สุ่มโจทย์ใหม่</button>
       <button class="btn" onclick="resetScore()" style="background:rgba(255,70,70,0.12);border:1px solid rgba(255,70,70,0.3);color:#ff6b6b;">🔄 รีเซ็ต</button>
+      <button class="btn" onclick="showReport()" style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.25);color:#00e5ff;">📊 รายงานผลสอบ</button>
     </div>
     <div id="feedback"></div>
     <div class="mastery-row">
@@ -449,6 +484,45 @@ input[type=range]::-webkit-slider-runnable-track { height: 6px; }
       <span class="mastery-badge" id="mb-mm001">⭐ 0.001 มม. 0/5</span>
       <span class="mastery-badge" id="mb-in001">⭐ 0.001" 0/5</span>
       <span class="mastery-badge" id="mb-in0001">⭐ 0.0001" 0/5</span>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div class="report-modal" id="reportModal" onclick="if(event.target===this)closeReport()">
+    <div class="report-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <h3 style="color:#00e5ff;margin:0;font-size:1.1rem;">📊 รายงานผลสอบไมโครมิเตอร์</h3>
+        <button onclick="closeReport()" style="background:none;border:none;color:#78909c;font-size:1.8rem;cursor:pointer;line-height:1;">&times;</button>
+      </div>
+      <div class="report-summary" id="reportSummary"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-check" onclick="exportCSV()" style="font-size:0.82rem;padding:7px 14px;">📥 ดาวน์โหลด CSV (เปิดใน Excel)</button>
+        <button class="btn" onclick="clearExamLog()" style="background:rgba(255,70,70,0.12);border:1px solid rgba(255,70,70,0.3);color:#ff6b6b;font-size:0.82rem;padding:7px 14px;">🗑 ลบข้อมูลทั้งหมด</button>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.82rem;color:#90a4ae;">เกณฑ์ขั้นต่ำ:</span>
+          <input type="number" id="passThreshold" value="500" min="0" style="width:70px;padding:5px 8px;border-radius:8px;border:1px solid #37474f;background:#060b11;color:#fff;font-size:0.85rem;font-family:inherit;outline:none;text-align:center;" onchange="updateStudentSummary()">
+          <span style="font-size:0.78rem;color:#546e7a;">คะแนน</span>
+        </span>
+      </div>
+      <div style="overflow-x:auto;margin-bottom:14px;">
+        <table>
+          <thead>
+            <tr style="background:rgba(57,255,20,0.08);"><th>ชื่อ-สกุล</th><th>แผนก</th><th>ทำ</th><th>ถูก</th><th>อัตรา</th><th>คะแนนรวม</th><th>สถานะ</th></tr>
+          </thead>
+          <tbody id="studentSummaryBody"></tbody>
+        </table>
+      </div>
+      <details style="margin-bottom:8px;">
+        <summary style="cursor:pointer;color:#78909c;font-size:0.85rem;font-weight:700;">📋 รายละเอียดทุกข้อ (คลิกเปิด)</summary>
+        <div style="overflow-x:auto;margin-top:8px;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>ชื่อ-สกุล</th><th>แผนก</th><th>โหมด</th><th>ระดับ</th><th>โจทย์</th><th>คำตอบ</th><th>ผล</th><th>คะแนน</th><th>เวลา</th></tr>
+            </thead>
+            <tbody id="reportBody"></tbody>
+          </table>
+        </div>
+      </details>
     </div>
   </div>
 
@@ -532,6 +606,112 @@ let currentObject = 'none';
 let score = 0;
 let streak = 0;
 let totalAttempts = 0;
+
+// Exam log (persisted in localStorage)
+let examLog = JSON.parse(localStorage.getItem('micrometerExamLog') || '[]');
+
+const TEACHER_PIN = '1234';
+let teacherAuth = false;
+function checkTeacherAuth() {
+  if (teacherAuth) return true;
+  const pin = prompt('🔒 กรุณาใส่รหัสครู:');
+  if (pin === TEACHER_PIN) { teacherAuth = true; return true; }
+  if (pin !== null) alert('❌ รหัสไม่ถูกต้อง');
+  return false;
+}
+
+function logExam(result, userAnswer) {
+  examLog.push({
+    name: document.getElementById('studentName').value.trim() + ' ' + document.getElementById('studentSurname').value.trim(),
+    dept: document.getElementById('studentDept').value.trim(),
+    mode: cfg.label,
+    diff: difficulty,
+    question: cfg.fmtVal(practiceVal),
+    answer: userAnswer,
+    result: result,
+    points: result === true ? (10 * ({easy:1,medium:2,hard:3}[difficulty]||1) * (cfg.id.startsWith('in')?2:1)) : 0,
+    time: new Date().toLocaleString('th-TH')
+  });
+  localStorage.setItem('micrometerExamLog', JSON.stringify(examLog));
+}
+
+function showReport() {
+  if (!checkTeacherAuth()) return;
+  const tbody = document.getElementById('reportBody');
+  tbody.innerHTML = '';
+  if (examLog.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#546e7a;padding:20px;">ยังไม่มีข้อมูลการสอบ</td></tr>';
+  } else {
+    examLog.forEach((e, i) => {
+      const diffIcon = {easy:'🟢',medium:'🟡',hard:'🔴'}[e.diff] || '';
+      const resultText = e.result === 'timeout' ? '⏰ หมดเวลา' : e.result === true ? '✅ ถูก' : '❌ ผิด';
+      tbody.innerHTML += '<tr><td>'+(i+1)+'</td><td>'+e.name+'</td><td>'+e.dept+'</td><td>'+e.mode+'</td><td>'+diffIcon+' '+e.diff+'</td><td>'+e.question+'</td><td>'+e.answer+'</td><td>'+resultText+'</td><td>'+e.points+'</td><td style="font-size:0.75rem">'+e.time+'</td></tr>';
+    });
+  }
+  const total = examLog.length;
+  const correct = examLog.filter(e => e.result === true).length;
+  const totalPts = examLog.reduce((s, e) => s + e.points, 0);
+  const students = [...new Set(examLog.map(e => e.name))];
+  document.getElementById('reportSummary').innerHTML =
+    '<div class="report-stat">ทำทั้งหมด: <strong>'+total+'</strong> ข้อ</div>' +
+    '<div class="report-stat">ถูก: <strong>'+correct+'</strong> ('+( total ? Math.round(correct/total*100) : 0 )+'%)</div>' +
+    '<div class="report-stat">คะแนนรวม: <strong>'+totalPts+'</strong></div>' +
+    '<div class="report-stat">จำนวนผู้สอบ: <strong>'+students.length+'</strong> คน</div>';
+  updateStudentSummary();
+  document.getElementById('reportModal').style.display = 'flex';
+}
+
+function updateStudentSummary() {
+  const threshold = parseInt(document.getElementById('passThreshold').value) || 0;
+  const byStudent = {};
+  examLog.forEach(e => {
+    if (!byStudent[e.name]) byStudent[e.name] = { dept: e.dept, total: 0, correct: 0, points: 0 };
+    byStudent[e.name].total++;
+    if (e.result === true) byStudent[e.name].correct++;
+    byStudent[e.name].points += e.points;
+  });
+  const stBody = document.getElementById('studentSummaryBody');
+  stBody.innerHTML = '';
+  if (examLog.length === 0) {
+    stBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#546e7a;padding:14px;">ยังไม่มีข้อมูล</td></tr>';
+    return;
+  }
+  Object.entries(byStudent).forEach(([name, s]) => {
+    const pct = s.total ? Math.round(s.correct / s.total * 100) : 0;
+    const pass = s.points >= threshold;
+    const statusText = pass ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+    const rowBg = pass ? 'background:rgba(57,255,20,0.04)' : 'background:rgba(255,0,127,0.04)';
+    const ptsColor = pass ? 'color:#39ff14' : 'color:#ff007f';
+    stBody.innerHTML += '<tr style="'+rowBg+'"><td>'+name+'</td><td>'+s.dept+'</td><td>'+s.total+'</td><td>'+s.correct+'</td><td>'+pct+'%</td><td style="font-weight:bold;'+ptsColor+'">'+s.points+'</td><td style="font-weight:bold;'+ptsColor+'">'+statusText+'</td></tr>';
+  });
+}
+
+function closeReport() {
+  document.getElementById('reportModal').style.display = 'none';
+}
+
+function exportCSV() {
+  if (examLog.length === 0) { alert('ยังไม่มีข้อมูล'); return; }
+  const BOM = '﻿';
+  const header = 'ลำดับ,ชื่อ-สกุล,แผนก,โหมด,ระดับ,โจทย์,คำตอบ,ผล,คะแนน,เวลา\n';
+  const rows = examLog.map((e, i) =>
+    (i+1)+',"'+e.name+'","'+e.dept+'","'+e.mode+'","'+e.diff+'","'+e.question+'","'+e.answer+'","'+(e.result==='timeout'?'หมดเวลา':e.result===true?'ถูก':'ผิด')+'",'+e.points+',"'+e.time+'"'
+  ).join('\n');
+  const blob = new Blob([BOM + header + rows], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'micrometer-exam-report.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function clearExamLog() {
+  if (!checkTeacherAuth()) return;
+  if (!confirm('ต้องการลบข้อมูลรายงานทั้งหมดจริงหรือ?')) return;
+  examLog = [];
+  localStorage.removeItem('micrometerExamLog');
+  showReport();
+}
 
 // Canvas Setup
 const cv     = document.getElementById('cv');
@@ -1462,6 +1642,18 @@ window.addEventListener('keydown', function(e) {
 // PRACTICE / TEST QUIZ MODE
 // ═══════════════════════════════════════════════════════════════════
 function newQ(){
+  const sName = document.getElementById('studentName').value.trim();
+  const sSurname = document.getElementById('studentSurname').value.trim();
+  const sDept = document.getElementById('studentDept').value.trim();
+  if (!sName || !sSurname || !sDept) {
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--warning)">⚠️ กรุณากรอก ชื่อ นามสกุล และแผนก/ห้อง ก่อนเริ่มทำแบบทดสอบ</span>';
+    const fid = !sName ? 'studentName' : !sSurname ? 'studentSurname' : 'studentDept';
+    const el = document.getElementById(fid);
+    el.focus();
+    el.style.borderColor = '#ff007f';
+    setTimeout(() => el.style.borderColor = '#37474f', 2000);
+    return;
+  }
   practiceVal = pickPracticeVal();
   practiceMode = true;
   measure = practiceVal;
@@ -1520,6 +1712,7 @@ function checkAns(){
     score += pts;
     streak += 1;
 
+    logExam(true, document.getElementById('answer').value.trim());
     spawnConfetti();
     draw(measure);
 
@@ -1542,6 +1735,7 @@ function checkAns(){
     speak('ถูกต้อง! ค่าที่อ่านได้คือ ' + valText.replace(' มม.',' มิลลิเมตร').replace('"',' นิ้ว'));
     updateMastery(true);
   } else {
+    logExam(false, document.getElementById('answer').value.trim());
     streak = 0;
     document.getElementById('streakBoard').style.display = 'none';
     const hint = generateHint(raw);
@@ -1767,6 +1961,7 @@ function stopTimer() {
 
 function onTimerExpired() {
   if (!practiceMode) return;
+  logExam('timeout', '-');
   practiceMode = false;
   streak = 0;
   document.getElementById('streakBoard').style.display = 'none';
